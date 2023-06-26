@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>自助解析下载</title>
+</head>
+<body>
+	<h1>Unity国际版自助解析下载（实验性）</h1>
+	<div>
+	<label>没有找到想要的版本？尝试解析一下！</label>
+	</div>
+	<div>
+	<label for="version">输入版本号：</label>
+	<input type="text" id="version">
+	<button onclick="parseAndRedirect()">解析并跳转</button>
+	</div>
+	<div>
+	<label>例如想下载Unity2022.3.1f1就输入2022.3.1</label>
+	<label>错误输入可能导致无法下载！</label>
+	</div>
+	<div>
+	<br><br>
+	<div>
+	<label>原理：</label>
+	</div>
+	<div>
+	<label>似乎是Unity Hub的一个Bug</label>
+	</div>
+	<div>
+	<label>部分Unity版本链接似乎不会检验后方md5值</label>
+	</div>
+	<div>
+	<label>仅作为没有找到下载链接时的备用方案。</label>
+	</div>
+	<div>
+	<label>			——2023.6.26</label>
+	</div>
+	</div>
+	<script>
+		function parseAndRedirect() {
+			const input = document.getElementById("version").value;
+			const url = `unityhub://${input}f1/0x0x0x0x0x0x`;
+			window.location.href = url;
+		}
+	</script>
+	<div>
+	<a href="http://unity.dkdk.eu.org">返回主站</a>
+	</div>
+</body>
+</html>
