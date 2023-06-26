@@ -32,6 +32,10 @@
 - [Unity2017系列](./Unity2017/index)
 - [Unity5系列](./Unity5/index)
 
+## 帮助我们：
+   由于各种因素，本站Unity版本可能无法及时更新
+   欢迎在Github帮助我们完善页面：https://github.com/DanKE123abc/NoUnityCN
+
 ## 特别鸣谢：
 
 https://vercel.com
