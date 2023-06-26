@@ -10,11 +10,11 @@
 
 ## 使用方法：
 
-1. 下载Unity Hub
+1. **下载Unity Hub**
 
    国内版下载链接：[ Unity中国官网](https://unity.cn/releases)
 
-2. 下载Unity
+2. **下载Unity**
 
    保持Unity Hub为打开状态
 
@@ -32,7 +32,16 @@
 - [Unity2017系列](./Unity2017/index)
 - [Unity5系列](./Unity5/index)
 
+## 直链下载：
+
+*（实验性功能）*
+
+**输入Unity链接**（unityhub://）**解析为直链安装包下载**
+
+**解析器地址：**https://unity.dkdk.eu.org/download.html
+
 ## 帮助我们：
+
    由于各种因素，本站Unity版本可能无法及时更新
    欢迎在Github帮助我们完善页面：https://github.com/DanKE123abc/NoUnityCN
 

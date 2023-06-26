@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Unity直链解析器</title>
+</head>
+
+<body>
+	<h1>Unity 直链下载解析器</h1>
+	<label for="downloadLink">请输入Unity链接：</label>
+	<input type="text" id="downloadLink" name="downloadLink"><br><br>
+	<form onsubmit="parseLinkwin(); return false;">
+		<button type="submit">Windows(x86-64)下载</button><br><br>
+	</form>
+	<form onsubmit="parseLinkmac(); return false;">
+		<button type="submit">MacOS(x86-64)下载</button><br><br>
+	</form>
+	<form onsubmit="parseLinkmacarm(); return false;">
+		<button type="submit">MacOS(ARM64)下载</button><br><br>
+	</form>
+	<form onsubmit="parseLinklinux(); return false;">
+		<button type="submit">Linux(x86-64)下载</button><br><br>
+	</form>
+
+	<a href="http://unity.dkdk.eu.org">返回主站</a>
+
+	<script>
+		function parseLinkwin() {
+			let inputLink = document.getElementById("downloadLink").value.trim().toLowerCase();
+			let prefix = "unityhub://";
+			let fileId = "";
+			let version = "";
+
+			if (inputLink.startsWith(prefix)) {
+				let linkParts = inputLink.substring(prefix.length).split("/");
+				fileId = linkParts[1];
+				version = linkParts[0];
+			} else {
+				alert("请输入正确的Unity Hub下载链接");
+				return;
+			}
+
+			// 生成下载链接
+			let downloadLink = `https://download.unity3d.com/download_unity/${fileId}/Windows64EditorInstaller/UnitySetup64-${version}.exe`;
+			//downloadLink = downloadLink.replace('unity3d.com', 'unitychina.cn')
+
+			window.open(downloadLink, '_blank');
+		}
+	</script>
+	<script>
+		function parseLinkmac() {
+			let inputLink = document.getElementById("downloadLink").value.trim().toLowerCase();
+			let prefix = "unityhub://";
+			let fileId = "";
+			let version = "";
+
+			if (inputLink.startsWith(prefix)) {
+				let linkParts = inputLink.substring(prefix.length).split("/");
+				fileId = linkParts[1];
+				version = linkParts[0];
+			} else {
+				alert("请输入正确的Unity Hub下载链接");
+				return;
+			}
+
+			// 生成下载链接
+			let downloadLink = `https://download.unity3d.com/download_unity/${fileId}/MacEditorInstaller/Unity-${version}.pkg`;
+			//downloadLink = downloadLink.replace('unity3d.com', 'unitychina.cn')
+
+			window.open(downloadLink, '_blank');
+		}
+	</script>
+	<script>
+		function parseLinkmacarm() {
+			let inputLink = document.getElementById("downloadLink").value.trim().toLowerCase();
+			let prefix = "unityhub://";
+			let fileId = "";
+			let version = "";
+
+			if (inputLink.startsWith(prefix)) {
+				let linkParts = inputLink.substring(prefix.length).split("/");
+				fileId = linkParts[1];
+				version = linkParts[0];
+			} else {
+				alert("请输入正确的Unity Hub下载链接");
+				return;
+			}
+
+			// 生成下载链接
+			let downloadLink = `https://download.unity3d.com/download_unity/${fileId}/MacEditorInstallerArm64/Unity-${version}.pkg`;
+			//downloadLink = downloadLink.replace('unity3d.com', 'unitychina.cn')
+
+			window.open(downloadLink, '_blank');
+		}
+	</script>
+	<script>
+		function parseLinklinux() {
+			let inputLink = document.getElementById("downloadLink").value.trim().toLowerCase();
+			let prefix = "unityhub://";
+			let fileId = "";
+			let version = "";
+
+			if (inputLink.startsWith(prefix)) {
+				let linkParts = inputLink.substring(prefix.length).split("/");
+				fileId = linkParts[1];
+				version = linkParts[0];
+			} else {
+				alert("请输入正确的Unity Hub下载链接");
+				return;
+			}
+
+			// 生成下载链接
+			let downloadLink = `https://download.unity3d.com/download_unity/${fileId}/LinuxEditorInstaller/Unity-${version}.tar.xz`;
+			//downloadLink = downloadLink.replace('unity3d.com', 'unitychina.cn')
+
+			window.open(downloadLink, '_blank');
+		}
+	</script>
+</body>
+
+</html>
