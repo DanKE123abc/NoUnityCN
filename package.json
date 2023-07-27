@@ -1,0 +1,18 @@
+{
+  "name": "nounitycn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-npm": "npm install express body-parser --save",
+    "install-cnpm": "cnpm install express body-parser --save",
+    "start": "node download.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2"
+  }
+}
