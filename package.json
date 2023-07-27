@@ -4,15 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "install-npm": "npm install express body-parser --save",
-    "install-cnpm": "cnpm install express body-parser --save",
-    "start": "nohup node download.js"
+    "install-npm": "npm install express body-parser pm2 --save",
+    "install-cnpm": "cnpm install express body-parser pm2 --save",
+    "start": "pm2 start download.js &"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "pm2": "^5.3.0"
   }
 }
