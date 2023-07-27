@@ -6,7 +6,7 @@
   "scripts": {
     "install-npm": "npm install express body-parser --save",
     "install-cnpm": "cnpm install express body-parser --save",
-    "start": "node download.js"
+    "start": "nohup node download.js"
   },
   "keywords": [],
   "author": "",

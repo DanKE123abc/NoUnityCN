@@ -26,5 +26,5 @@ app.get('/download', (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log('Download Sever Run');
+    console.log('Download Sever Running');
 });
