@@ -2,27 +2,99 @@
 <html>
 
 <head>
-	<title>Unity直链解析器</title>
+	<title>NoUnityCN 下载</title>
+	<style>
+		/* 其他样式 */
+
+		:root {
+			--background-color: #fff;
+			/* 默认背景颜色 */
+			--text-color: #000;
+			/* 默认文本颜色 */
+		}
+
+		@media (prefers-color-scheme: dark) {
+			:root {
+				--background-color: #000;
+				/* 夜间模式背景颜色 */
+				--text-color: #fff;
+				/* 夜间模式文本颜色 */
+			}
+		}
+
+		.dark-mode {
+			--background-color: #000;
+			--text-color: #fff;
+		}
+
+		body {
+			background-color: var(--background-color);
+			color: var(--text-color);
+		}
+	</style>
 </head>
 
-<body>
-	<h1>Unity 直链下载解析器</h1>
-	<label for="downloadLink">请输入Unity链接：</label>
-	<input type="text" id="downloadLink" name="downloadLink"><br><br>
-	<form onsubmit="parseLinkwin(); return false;">
-		<button type="submit">Windows(x86-64)下载</button><br><br>
-	</form>
-	<form onsubmit="parseLinkmac(); return false;">
-		<button type="submit">MacOS(x86-64)下载</button><br><br>
-	</form>
-	<form onsubmit="parseLinkmacarm(); return false;">
-		<button type="submit">MacOS(ARM64)下载</button><br><br>
-	</form>
-	<form onsubmit="parseLinklinux(); return false;">
-		<button type="submit">Linux(x86-64)下载</button><br><br>
-	</form>
+<style>
+	/* 自定义按钮样式 */
+	.custom-button {
+		background-color: transparent;
+		/* 设置按钮背景透明 */
+		border: 2px solid #4CAF50;
+		/* 设置按钮边框为绿色 */
+		color: #4CAF50;
+		/* 设置按钮文字颜色为绿色 */
+		padding: 10px 20px;
+		/* 设置按钮内边距 */
+		text-align: center;
+		/* 设置文字居中 */
+		text-decoration: none;
+		/* 去除文字下划线 */
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		cursor: pointer;
+		border-radius: 4px;
+		/* 设置按钮圆角 */
+	}
+</style>
 
-	<a href="http://unity.dkdk.eu.org">返回主站</a>
+
+<body>
+	<div align="center">
+		<h1>Unity 直链下载解析器</h1>
+		<label for="downloadLink" id="label">请输入Unity链接：</label>
+		<input type="text" id="downloadLink" name="downloadLink"><br><br>
+		<form onsubmit="parseLinkwin(); return false;">
+			<button class="custom-button" type="submit">Windows(x86-64)下载</button><br><br>
+		</form>
+		<form onsubmit="parseLinkmac(); return false;">
+			<button class="custom-button" type="submit">MacOS(x86-64)下载</button><br><br>
+		</form>
+		<form onsubmit="parseLinkmacarm(); return false;">
+			<button class="custom-button" type="submit">MacOS(ARM64)下载</button><br><br>
+		</form>
+		<form onsubmit="parseLinklinux(); return false;">
+			<button class="custom-button" type="submit">Linux(x86-64)下载</button><br><br>
+		</form>
+		<button id="mode-toggle" onclick="toggleMode()">切换模式</button>
+		<br><br>
+		<a href="http://unity.dkdk.eu.org">返回主站</a>
+	</div>
+
+	<script>
+		function toggleMode() {
+			// 获取body元素
+			const body = document.body;
+
+			// 切换夜间模式和白天模式的CSS类名
+			body.classList.toggle('dark-mode');
+		}
+
+		// 检查用户首选颜色方案，如果是夜间模式，则默认应用夜间模式的CSS类名
+		if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+			document.body.classList.add('dark-mode');
+		}
+	</script>
 
 	<script>
 		function parseLinkwin() {
@@ -114,6 +186,34 @@
 			//downloadLink = downloadLink.replace('unity3d.com', 'unitychina.cn')
 
 			window.open(downloadLink, '_blank');
+		}
+	</script>
+
+	<script type="text/javascript">
+		function getParams(key) {
+			var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null) {
+				return unescape(r[2]);
+			}
+			return null;
+		};
+		if (getParams("url") != null) {
+			console.log("解析链接:" + getParams("url"));//输出
+			var inputElement = document.getElementById("downloadLink");
+			inputElement.value = getParams("url");
+			inputElement.style.display = "none";
+			document.getElementById("label").style.display = "none";
+		}
+
+		function toggleMode() {
+			const body = document.body;
+			body.classList.toggle('dark-mode');
+		}
+		const urlParams = new URLSearchParams(window.location.search);
+		const mode = urlParams.get('mode');
+		if (mode === 'dark') {
+			document.body.classList.add('dark-mode');
 		}
 	</script>
 </body>
