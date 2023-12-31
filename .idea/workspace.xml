@@ -5,34 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="14f03b0c-b5b1-472e-8bb6-58331b6dad90" name="变更" comment="update">
-      <change afterPath="$PROJECT_DIR$/_footer.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_navbar.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/css/docsify/dark.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/css/docsify/vue-themes.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/download.iframe.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/docsify.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/copy-code.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/countable.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/emoji.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/flexible-alerts.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/footer.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/pagination.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/search.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/sidebar-collapse.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/docsify/plugins/zoom-image.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/js/jquery-3.7.1.min.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity2017/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity2017/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity2018/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity2018/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity2019/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity2019/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity2020/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity2020/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity2021/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity2021/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity2022/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity2022/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Unity5/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/Unity/Unity5/index.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_sidebar.md" beforeDir="false" afterPath="$PROJECT_DIR$/_sidebar.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/download.html" beforeDir="false" afterPath="$PROJECT_DIR$/download.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/index.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -104,7 +77,7 @@
       <workItem from="1687768145376" duration="1466000" />
       <workItem from="1689855900587" duration="74000" />
       <workItem from="1690458466605" duration="44000" />
-      <workItem from="1703987378220" duration="2977000" />
+      <workItem from="1703987378220" duration="3821000" />
     </task>
     <task id="LOCAL-00001" summary="update">
       <created>1677394737338</created>

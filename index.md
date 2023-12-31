@@ -65,4 +65,4 @@ https://dnspod.cn
 
 https://freenom.com/
 
-https://www.bilibili.com/read/cv21542559
+https://github.com/
