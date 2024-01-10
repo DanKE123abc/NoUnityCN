@@ -42,7 +42,11 @@
 
 ## 帮助我们：
 
-   由于各种因素，本站Unity版本可能无法及时更新
+### 缺乏维护者！
+   由于蛋壳学业问题，本站Unity版本无法及时更新
+
+   我已经尽力了，上高中之后几乎没什么时间写代码了。
+
    欢迎在Github帮助我们完善页面：https://github.com/DanKE123abc/NoUnityCN
 
    或者你可以进行捐赠以帮助我们的工作
@@ -64,5 +68,6 @@ https://eu.org
 https://dnspod.cn
 
 https://freenom.com/
+
 
 https://github.com/
