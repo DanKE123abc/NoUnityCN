@@ -11,7 +11,7 @@ NoUnityCN是一项大家一起实现的开源项目，我们旨在为部分特�
 - 使用electron实现多线程下载器、组件管理
 
 ### 版权所有
-本软件遵循 MIT License
+本软件遵循 MIT License，项目内所有代码遵循协议分发，但不包括通过API(Application Programming Interface)获取的内容及基于本项目开发的衍生内容。
 
 copyright©️ 2025 DanKe
 
