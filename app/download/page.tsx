@@ -44,7 +44,7 @@ export default function DocsPage({
     }
 
     function parseLinklinux(key:string) {
-        let downloadLink = `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/LinuxEditorInstaller/Unity-$${parseUnityHubUri(key)?.version}.tar.xz`;
+        let downloadLink = `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/LinuxEditorInstaller/Unity-${parseUnityHubUri(key)?.version}.tar.xz`;
         //downloadLink = downloadLink.replace('unity3d.com', 'unitychina.cn')
         return downloadLink;
     }
@@ -78,7 +78,7 @@ export default function DocsPage({
                                 <Button variant="secondary" className="w-full" size="lg"
                                         href={`${parseLinkmac(version)}`}>
                                     <Download className="w-5 h-5 mr-2"/>
-                                    MacOS(x86-64)下载下载
+                                    MacOS(x86-64)下载
                                 </Button>
                                 <Button variant="secondary" className="w-full" size="lg"
                                         href={`${parseLinkmacarm(version)}`}>
