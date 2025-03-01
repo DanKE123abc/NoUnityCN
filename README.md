@@ -1,14 +1,13 @@
 # NoUnityCN
 
-#### 官方网址：[首选网址](https://nounitycn.danke666.top/) | [备用网址](https://unity.dkdk.eu.org/)
+#### 官方网址：[nounitycn.top](https://nounitycn.top/) | [备用网址](https://nounitycn.danke666.top/)
 
 NoUnityCN是一项大家一起实现的开源项目，我们旨在为部分特殊地区的Unity开发者提供与世界上大多数用户一致的Unity Editor下载方式。
+
 
 ### ⚠️本项目面临的问题⚠️
 - 缺乏维护者
   - 本项目无法及时更新版本内容
-- 没有稳定的域名
-  - 本项目目前使用danke666.top和dkdk.eu.org的子域名
 - 下载有可能永久失效
   - 我们不保存任何文件，使用Unity的官方cdn进行下载，未来在中国大陆有可能失效
 
