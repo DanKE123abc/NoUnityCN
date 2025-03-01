@@ -4,7 +4,9 @@ import {Download, Home} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {CardContent} from "@/components/ui/card";
 
-export default function DocsPage({
+export const dynamic = 'force-dynamic'; 
+
+export default function DownloadPage({
                                      searchParams,
                                  }: {
     searchParams?: { [key: string]: string | string[] | undefined };
