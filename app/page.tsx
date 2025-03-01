@@ -115,7 +115,7 @@ export default function Page() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">下载Unity的中国版本</p>
-                <p>请注意：您可以将您的项目从Unity迁移到团结引擎，但目前不支持从团结引擎迁移到Unity。</p>
+                <p className="text-gray-600 mb-4">请注意：您可以将您的项目从Unity迁移到团结引擎，但目前不支持从团结引擎迁移到Unity。</p>
                 <div className="space-y-4">
                   <Button variant="secondary" className="w-full" size="lg" href="https://unity.cn/releases">
                     <Share className="w-5 h-5 mr-2"/>
