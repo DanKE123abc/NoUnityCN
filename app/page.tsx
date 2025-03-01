@@ -99,6 +99,10 @@ export default function Page() {
                     <Download className="w-5 h-5 mr-2"/>
                     立刻下载
                   </Button>
+                    <Button variant="secondary" className="w-full" size="lg" href={`./component?v=${getLatestVersion()}`}>
+                        <Box className="w-5 h-5 mr-2"/>
+                        添加组件
+                    </Button>
                 </div>
               </CardContent>
             </Card>
@@ -111,6 +115,7 @@ export default function Page() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">下载Unity的中国版本</p>
+                <p>请注意：您可以将您的项目从Unity迁移到团结引擎，但目前不支持从团结引擎迁移到Unity。</p>
                 <div className="space-y-4">
                   <Button variant="secondary" className="w-full" size="lg" href="https://unity.cn/releases">
                     <Share className="w-5 h-5 mr-2"/>
@@ -147,7 +152,7 @@ export default function Page() {
                         </Button>
                     ))}
               </div>
-              <li className="space-y-4">
+              <ul className = "space-y-4">
                 {selectedVersion === "all"
                     ? Object.keys(versions)
                         .sort((a, b) => parseInt(b) - parseInt(a))
@@ -208,7 +213,7 @@ export default function Page() {
                       </Button>
                     </li>
                 )}
-              </li>
+              </ul>
             </CardContent>
           </Card>
         </div>

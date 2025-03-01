@@ -1,7 +1,7 @@
 const footerNavigation = {
   产品: [
     { name: "下载 Unity Editor", href: "/" },
-    { name: "下载 Unity Hub", href: "/" },
+    { name: "下载 Unity Hub", href: "/unityhub" },
   ],
   资源: [
     { name: "文档", href: "/docs" },

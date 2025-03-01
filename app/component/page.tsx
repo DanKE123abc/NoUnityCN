@@ -64,12 +64,12 @@ export default function ComponentPage({searchParams,}: {
                             <Home className="w-6 h-6 text-gray-500 hover:text-gray-700 transition-colors"/>
                         </a>
                         <div className="flex items-baseline gap-2">
-                            准备下载：
+                            添加组件：
                             <span className="text-lg text-gray-500">{version}</span>
                         </div>
                     </h1>
                     <div className="prose prose-blue max-w-none overflow-x-auto">
-                        <li>
+                        <ul>
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-xl">Windows专区</CardTitle>
@@ -141,8 +141,8 @@ export default function ComponentPage({searchParams,}: {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </li>
-                        <li>
+                        </ul>
+                        <ul>
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-xl">Mac OS专区</CardTitle>
@@ -209,8 +209,8 @@ export default function ComponentPage({searchParams,}: {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </li>
-                        <li>
+                        </ul>
+                        <ul>
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-xl">Linux专区</CardTitle>
@@ -267,7 +267,7 @@ export default function ComponentPage({searchParams,}: {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </li>
+                        </ul>
                     </div>
                 </div>
             </main>
