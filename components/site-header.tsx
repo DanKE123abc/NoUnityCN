@@ -8,6 +8,7 @@ const navigation = [
   { name: "主页", href: "/" },
   { name: "文档", href: "/docs" },
   { name: "社区", href: "/community" },
+  { name: "Unity Hub", href: "/unityhub" },
 ]
 
 export function SiteHeader() {
