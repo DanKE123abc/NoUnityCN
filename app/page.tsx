@@ -1,5 +1,5 @@
 "use client";
-import { Download, Share} from "lucide-react";
+import { Download, Share, Box} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -154,18 +154,40 @@ export default function Page() {
                         .flatMap(year => versions[year])
                         .slice(0, showAllVersions ? undefined : 5) // 控制显示数量
                         .map((url) => (
-                            <li key={url}>
-                              <Button variant="secondary" className="w-full" size="lg" href={`./download?v=${url}`}>
+                            <li key={url} className="flex gap-2">
+                              <Button
+                                  variant="secondary"
+                                  className="flex-grow" // 修改为 flex-grow 自动扩展
+                                  size="lg"
+                                  href={`./download?v=${url}`}>
                                 <Download className="w-5 h-5 mr-2"/>
                                 {getVersionName(url)}下载
+                              </Button>
+                              <Button
+                                  className="flex-initial"
+                                  size="lg"
+                                  href={`./component?v=${url}`}>
+                                <Box className="w-5 h-5 mr-2"/>
+                                添加组件
                               </Button>
                             </li>
                         ))
                     : versions[selectedVersion].map((url: string) => (
-                        <li key={url}>
-                          <Button variant="secondary" className="w-full" size="lg" href={`./download?v=${url}`}>
+                        <li key={url} className="flex gap-2">
+                          <Button
+                              variant="secondary"
+                              className="flex-grow" // 修改为 flex-grow 自动扩展
+                              size="lg"
+                              href={`./download?v=${url}`}>
                             <Download className="w-5 h-5 mr-2"/>
                             {getVersionName(url)}下载
+                          </Button>
+                          <Button
+                              className="flex-initial"
+                              size="lg"
+                              href={`./component?v=${url}`}>
+                            <Box className="w-5 h-5 mr-2"/>
+                            添加组件
                           </Button>
                         </li>
                     ))}

@@ -25,19 +25,7 @@ export default function CommunityPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">查看NoUnityCN的源代码、报告问题</p>
-                <Button className="w-full" href="https://github.com/DanKE123abc/NoUnityCN">访问</Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-6 w-6" />
-                  BiliBili
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">蛋壳是B站最帅的Up主</p>
-                <Button className="w-full" href="https://space.bilibili.com/422698033">看看</Button>
+                <Button className="w-full" href="https://github.com/NoUnityCN/NoUnityCN">访问</Button>
               </CardContent>
             </Card>
           </div>

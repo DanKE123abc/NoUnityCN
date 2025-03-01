@@ -6,9 +6,7 @@ import {CardContent} from "@/components/ui/card";
 
 export const dynamic = 'force-dynamic'; 
 
-export default function DownloadPage({
-                                     searchParams,
-                                 }: {
+export default function DownloadPage({searchParams,}: {
     searchParams?: { [key: string]: string | string[] | undefined };
 }) {
     const version = searchParams?.v;
