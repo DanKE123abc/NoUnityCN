@@ -16,6 +16,7 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  dynamic: 'force-dynamic'
 }
 
 mergeConfig(nextConfig, userConfig)
