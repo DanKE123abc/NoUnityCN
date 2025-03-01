@@ -6,6 +6,9 @@ const footerNavigation = {
   资源: [
     { name: "文档", href: "/docs" },
   ],
+  更多: [
+    { name: "服务状态", href: "https://nounitycn.github.io/service/"}
+  ]
 }
 
 export function SiteFooter() {
