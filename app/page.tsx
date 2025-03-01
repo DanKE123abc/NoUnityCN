@@ -147,13 +147,14 @@ export default function Page() {
                         </Button>
                     ))}
               </div>
-              <ul className="space-y-4">
+              <li className="space-y-4">
                 {selectedVersion === "all"
                     ? Object.keys(versions)
                         .sort((a, b) => parseInt(b) - parseInt(a))
                         .flatMap(year => versions[year])
                         .slice(0, showAllVersions ? undefined : 5) // 控制显示数量
                         .map((url) => (
+                            <div className="overflow-x-auto">
                             <li key={url} className="flex gap-2">
                               <Button
                                   variant="secondary"
@@ -171,25 +172,28 @@ export default function Page() {
                                 添加组件
                               </Button>
                             </li>
+                            </div>
                         ))
                     : versions[selectedVersion].map((url: string) => (
-                        <li key={url} className="flex gap-2">
-                          <Button
-                              variant="secondary"
-                              className="flex-grow" // 修改为 flex-grow 自动扩展
-                              size="lg"
-                              href={`./download?v=${url}`}>
-                            <Download className="w-5 h-5 mr-2"/>
-                            {getVersionName(url)}下载
-                          </Button>
-                          <Button
-                              className="flex-initial"
-                              size="lg"
-                              href={`./component?v=${url}`}>
-                            <Box className="w-5 h-5 mr-2"/>
-                            添加组件
-                          </Button>
-                        </li>
+                        <div className="overflow-x-auto">
+                          <li key={url} className="flex gap-2">
+                            <Button
+                                variant="secondary"
+                                className="flex-grow" // 修改为 flex-grow 自动扩展
+                                size="lg"
+                                href={`./download?v=${url}`}>
+                              <Download className="w-5 h-5 mr-2"/>
+                              {getVersionName(url)}下载
+                            </Button>
+                            <Button
+                                className="flex-initial"
+                                size="lg"
+                                href={`./component?v=${url}`}>
+                              <Box className="w-5 h-5 mr-2"/>
+                              添加组件
+                            </Button>
+                          </li>
+                        </div>
                     ))}
 
                 {/* 添加更多版本按钮 */}
@@ -204,7 +208,7 @@ export default function Page() {
                       </Button>
                     </li>
                 )}
-              </ul>
+              </li>
             </CardContent>
           </Card>
         </div>
