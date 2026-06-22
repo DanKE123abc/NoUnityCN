@@ -5,29 +5,13 @@ const UNITY_API_BASE = 'https://services.api.unity.com/unity/editor/release/v1/r
 const MAX_LIMIT = 25;
 const outputFile = process.env.OUTPUT_FILE || 'public/release_data/releases.json';
 
-interface SlimRelease {
-  version: string;
-  stream: string;
-  releaseDate: string;
-  downloads: {
-    url: string;
-    type: string;
-    platform: string;
-    architecture: string;
-    downloadSize: { value: number; unit: string };
-    installedSize: { value: number; unit: string };
-    modules?: any[];
-  }[];
-  releaseNotes?: { url: string; type: string };
-}
-
-function slimRelease(release: any): SlimRelease {
+function slimRelease(release) {
   return {
     version: release.version,
     stream: release.stream,
     releaseDate: release.releaseDate,
     releaseNotes: release.releaseNotes,
-    downloads: (release.downloads || []).map((d: any) => ({
+    downloads: (release.downloads || []).map((d) => ({
       url: d.url,
       type: d.type,
       platform: d.platform,
@@ -38,8 +22,8 @@ function slimRelease(release: any): SlimRelease {
   };
 }
 
-async function fetchAllReleases(): Promise<SlimRelease[]> {
-  const allResults: SlimRelease[] = [];
+async function fetchAllReleases() {
+  const allResults = [];
   let offset = 0;
   let total = Infinity;
 
