@@ -1,7 +1,5 @@
 # NoUnityCN
 
-## 旧API失效，全新版本正在开发
-
 #### 官方网址：[nounitycn.top](https://nounitycn.top/)
 
 
@@ -15,6 +13,7 @@ NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版
 > 
 > 我们面向的开发者群体是**在华办公的海外开发者或使用中文作为工作语言的海外开发者及需要运程协助工作的开发者**，而**不为大中华区（包含中国大陆及港澳台区域）本土开发者提供服务**，对于后者，我们更推荐使用[团结引擎](https://unity.cn/).
 >
+> 本项目下载服务由[开源项目](https://github.com/zwc456baby/file-proxy)提供，请勿用于商业用途。
 
 > [!CAUTION]
 > 下载服务由公益项目提供，可能会因技术原因随时中断
@@ -35,14 +34,4 @@ NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版
 NoUnityCN v2版本在2026年6月上线，网站结构有所调整，但为了兼容历史遗留的url，我们保留了/download /component /tools /releaseNotses /unityModule 端点，这些端点仅为兼容旧版本url所保留，不会在新版网页中使用。
 
 Unity自6000系列开始属于“SUPPORTED”标签替代“TECH标签”，我们将其与“TECH”标签一并放在“技术支持”栏目中。
-
-
-https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg
-https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.dmg
-
-https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.exe
-https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-
-https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x86_64.rpm
-https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-amd64.deb
 

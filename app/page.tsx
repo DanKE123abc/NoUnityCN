@@ -6,7 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 
-type VersionDictionary = Record<string, string[]>;
+interface VersionInfo {
+  url: string;
+  releaseDate: string;
+}
+
+type VersionDictionary = Record<string, VersionInfo[]>;
 
 function extractFileId(downloadUrl: string): string | null {
   const match = downloadUrl.match(/download_unity\/([^/]+)\//);
@@ -17,8 +22,8 @@ function buildUnityHubUri(version: string, fileId: string): string {
   return `unityhub://${version}/${fileId}`;
 }
 
-function groupReleasesByStreamAndYear(results: any[]): Record<string, Record<string, string[]>> {
-  const grouped: Record<string, Record<string, string[]>> = {};
+function groupReleasesByStreamAndYear(results: any[]): Record<string, Record<string, VersionInfo[]>> {
+  const grouped: Record<string, Record<string, VersionInfo[]>> = {};
 
   const streamMapping: Record<string, string> = {
     "SUPPORTED": "TECH",
@@ -30,6 +35,7 @@ function groupReleasesByStreamAndYear(results: any[]): Record<string, Record<str
     const stream = streamMapping[rawStream] || rawStream;
     const versionNum = version.split('.')[0];
     const year = versionNum;
+    const releaseDate = release.releaseDate || '';
 
     const winDownload = release.downloads?.find((d: any) => d.platform === 'WINDOWS' && d.architecture === 'X86_64');
     const macDownload = release.downloads?.find((d: any) => d.platform === 'MAC_OS' && d.architecture === 'X86_64');
@@ -40,20 +46,30 @@ function groupReleasesByStreamAndYear(results: any[]): Record<string, Record<str
 
     if (!grouped[stream]) grouped[stream] = {};
     if (!grouped[stream][year]) grouped[stream][year] = [];
-    grouped[stream][year].push(buildUnityHubUri(version, fileId));
+    grouped[stream][year].push({ url: buildUnityHubUri(version, fileId), releaseDate });
   }
 
   for (const stream of Object.keys(grouped)) {
     for (const year of Object.keys(grouped[stream])) {
       grouped[stream][year].sort((a, b) => {
-        const aVer = a.split('/')[2].split('.')[1];
-        const bVer = b.split('/')[2].split('.')[1];
+        const aVer = a.url.split('/')[2].split('.')[1];
+        const bVer = b.url.split('/')[2].split('.')[1];
         return bVer.localeCompare(aVer);
       });
     }
   }
 
   return grouped;
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '-';
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  return `${y}年${m}月${d}日`;
 }
 
 export default function Page() {
@@ -64,8 +80,22 @@ export default function Page() {
   const [versionType, setVersionType] = useState("TECH");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Array<{type: string, url: string}>>([]);
+  const [searchResults, setSearchResults] = useState<Array<{type: string, url: string, releaseDate: string}>>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [loadedOffsets, setLoadedOffsets] = useState<Record<string, number>>({});
+  const [hasMore, setHasMore] = useState<Record<string, boolean>>({});
+
+  const fetchStreamPage = async (stream: string, offset: number): Promise<{results: any[], total: number}> => {
+    try {
+      const res = await fetch(`/api/releases?limit=25&offset=${offset}&stream=${stream}`);
+      if (!res.ok) return { results: [], total: 0 };
+      const data = await res.json();
+      return { results: data.results || [], total: data.total || 0 };
+    } catch {
+      return { results: [], total: 0 };
+    }
+  };
 
   useEffect(() => {
     const fetchAllVersions = async () => {
@@ -73,15 +103,14 @@ export default function Page() {
       try {
         const streams = ["TECH", "LTS", "BETA", "ALPHA", "SUPPORTED"];
         const fetches = streams.map(stream =>
-          fetch(`/api/releases?limit=25&stream=${stream}`)
-            .then(r => r.json())
-            .then(d => ({ stream, results: d.results || [] }))
-            .catch(() => ({ stream, results: [] }))
+          fetchStreamPage(stream, 0).then(d => ({ stream, ...d }))
         );
         const allResults = await Promise.all(fetches);
-        const allData: Record<string, Record<string, string[]>> = {};
+        const allData: Record<string, Record<string, VersionInfo[]>> = {};
+        const newOffsets: Record<string, number> = {};
+        const newHasMore: Record<string, boolean> = {};
 
-        for (const { stream, results } of allResults) {
+        for (const { stream, results, total } of allResults) {
           const grouped = groupReleasesByStreamAndYear(results);
           for (const s of Object.keys(grouped)) {
             const targetStream = s === "SUPPORTED" ? "TECH" : s;
@@ -91,27 +120,32 @@ export default function Page() {
               allData[targetStream][year].push(...grouped[s][year]);
             }
           }
+          const targetKey = stream === "SUPPORTED" ? "TECH" : stream;
+          newOffsets[targetKey] = results.length;
+          newHasMore[targetKey] = results.length < total;
         }
 
         if (Object.keys(allData).length === 0) {
-          allData["LTS"] = { "6000": ["unityhub://6000.0.38f1/82314a941f2d"] };
+          allData["LTS"] = { "6000": [{ url: "unityhub://6000.0.38f1/82314a941f2d", releaseDate: "" }] };
         }
 
         for (const stream of Object.keys(allData)) {
           for (const year of Object.keys(allData[stream])) {
             allData[stream][year].sort((a, b) => {
-              const aVer = a.split('/')[2].split('.')[1];
-              const bVer = b.split('/')[2].split('.')[1];
+              const aVer = a.url.split('/')[2].split('.')[1];
+              const bVer = b.url.split('/')[2].split('.')[1];
               return bVer.localeCompare(aVer);
             });
           }
         }
 
         setVersionsData(allData);
+        setLoadedOffsets(newOffsets);
+        setHasMore(newHasMore);
       } catch (error) {
         console.error('加载版本失败:', error);
         setVersionsData({
-          "LTS": { "6000": ["unityhub://6000.0.38f1/82314a941f2d"] }
+          "LTS": { "6000": [{ url: "unityhub://6000.0.38f1/82314a941f2d", releaseDate: "" }] }
         });
       } finally {
         setIsLoading(false);
@@ -121,12 +155,43 @@ export default function Page() {
     fetchAllVersions();
   }, []);
 
+  const loadMoreForStream = async (stream: string) => {
+    const offset = loadedOffsets[stream] || 0;
+    const { results, total } = await fetchStreamPage(stream, offset);
+    if (results.length === 0) return;
+
+    const grouped = groupReleasesByStreamAndYear(results);
+    setVersionsData(prev => {
+      const next = { ...prev };
+      for (const s of Object.keys(grouped)) {
+        const targetStream = s === "SUPPORTED" ? "TECH" : s;
+        if (!next[targetStream]) next[targetStream] = {};
+        for (const year of Object.keys(grouped[s])) {
+          if (!next[targetStream][year]) next[targetStream][year] = [];
+          next[targetStream][year].push(...grouped[s][year]);
+        }
+      }
+      for (const streamKey of Object.keys(next)) {
+        for (const year of Object.keys(next[streamKey])) {
+          next[streamKey][year].sort((a, b) => {
+            const aVer = a.url.split('/')[2].split('.')[1];
+            const bVer = b.url.split('/')[2].split('.')[1];
+            return bVer.localeCompare(aVer);
+          });
+        }
+      }
+      return next;
+    });
+    setLoadedOffsets(prev => ({ ...prev, [stream]: offset + results.length }));
+    setHasMore(prev => ({ ...prev, [stream]: offset + results.length < total }));
+  };
+
   const versions = versionsData[versionType] || {};
 
   useEffect(() => {
     if (searchQuery) {
       setIsSearching(true);
-      const results: Array<{type: string, url: string}> = [];
+      const results: Array<{type: string, url: string, releaseDate: string}> = [];
 
       const typeOrder = ["LTS", "TECH", "BETA", "ALPHA", "SUPPORTED"];
 
@@ -134,10 +199,10 @@ export default function Page() {
         const typeVersions = versionsData[type] || {};
 
         for (const year in typeVersions) {
-          for (const url of typeVersions[year]) {
-            const versionName = getVersionName(url);
+          for (const v of typeVersions[year]) {
+            const versionName = getVersionName(v.url);
             if (versionName.toLowerCase().includes(searchQuery.toLowerCase())) {
-              results.push({ type, url });
+              results.push({ type, url: v.url, releaseDate: v.releaseDate });
             }
           }
         }
@@ -182,55 +247,43 @@ export default function Page() {
     }
 
     return yearVersions.sort((a, b) => {
-      const aVer = a.split('/')[2].split('.')[1];
-      const bVer = b.split('/')[2].split('.')[1];
+      const aVer = a.url.split('/')[2].split('.')[1];
+      const bVer = b.url.split('/')[2].split('.')[1];
       return bVer.localeCompare(aVer);
-    })[0];
+    })[0].url;
   }
 
   function getVersionName(url: string) {
     const version = url.split("://")[1].split("/")[0];
-    return `Unity ${version}`;
+    return `${version}`;
   }
 
-  const filterVersions = (versions: string[]) => {
-    if (!searchQuery) return versions;
-    return versions.filter(url =>
-      getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  };
-
-  const renderVersionItem = (url: string, type?: string) => (
-    <div className="overflow-x-auto" key={`${type || versionType}-${url}`}>
-      <li className="flex gap-2">
-        <Button
-          variant="secondary"
-          className="flex-grow"
-          size="lg"
-          href={`./download?v=${url}`}
-        >
-          <Download className="w-5 h-5 mr-2"/>
-          {type ? <><span className="font-bold">[{type}]</span> {getVersionName(url)} </> : getVersionName(url)}下载
+  const renderVersionRow = (url: string, releaseDate: string, type?: string) => (
+    <tr key={`${type || versionType}-${url}`} className="border-b border-gray-100 hover:bg-gray-50">
+      <td className="py-3 px-4 font-medium text-gray-900">
+        {type && <Badge variant="outline" className="mr-2 text-xs">{type}</Badge>}
+        {getVersionName(url)}
+      </td>
+      <td className="py-3 px-4 text-gray-500 text-sm">{formatDate(releaseDate)}</td>
+      <td className="py-3 px-4">
+        <Button variant="secondary" size="sm" href={`./releaseNotes?v=${url}`}>
+          <Share className="w-4 h-4 mr-1"/>
+          发布说明
         </Button>
-        <Button
-            variant="secondary"
-            className="flex-initial"
-            size="lg"
-            href={`./releaseNotes?v=${url}`}
-        >
-          <Share className="w-5 h-5 mr-2"/>
-          查看发行说明
+      </td>
+      <td className="py-3 px-4">
+        <Button size="sm" href={`./download?v=${url}`}>
+          <Download className="w-4 h-4 mr-1"/>
+          下载
         </Button>
-        <Button
-            className="flex-initial"
-            size="lg"
-            href={`./component?v=${url}`}
-        >
-          <Box className="w-5 h-5 mr-2"/>
+      </td>
+      <td className="py-3 px-4">
+        <Button variant="outline" size="sm" href={`./component?v=${url}`}>
+          <Box className="w-4 h-4 mr-1"/>
           添加组件
         </Button>
-      </li>
-    </div>
+      </td>
+    </tr>
   );
 
   return (
@@ -264,6 +317,7 @@ export default function Page() {
                 onClick={() => {
                   setVersionType(type.id);
                   setSelectedVersion("all");
+                  setShowAllVersions(false);
                   if (searchQuery) {
                     setSearchQuery("");
                   }
@@ -272,34 +326,6 @@ export default function Page() {
                 {type.name}
               </Button>
             ))}
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xl">
-                  {versionType === "LTS" && "长期支持版本"}
-                  {versionType === "TECH" && "技术支持版本"}
-                  {versionType === "BETA" && "测试版本"}
-                  {versionType === "ALPHA" && "预览版本"}
-                </CardTitle>
-                <Badge>{versionType === "TECH" ? "SUPPORTED" : versionType}</Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">{getVersionName(getLatestVersion(versionType))}</p>
-                <div className="space-y-4">
-                  <Button className="w-full" size="lg" href={`./download?v=${getLatestVersion(versionType)}`}>
-                    <Download className="w-5 h-5 mr-2"/>
-                    立刻下载
-                  </Button>
-                  <Button variant="secondary" className="w-full" size="lg" href={`./component?v=${getLatestVersion(versionType)}`}>
-                    <Box className="w-5 h-5 mr-2"/>
-                    添加组件
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
           </div>
 
           <Card className="mb-12">
@@ -349,76 +375,91 @@ export default function Page() {
                 </div>
               )}
 
-              <ul className="space-y-4">
-                {isSearching ? (
-                  <>
-                    {searchResults.length > 0 ? (
-                      searchResults
-                        .slice(0, showAllVersions ? undefined : 10)
-                        .map(item => renderVersionItem(item.url, item.type))
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2 border-gray-200">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">版本</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">发布时间</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">发布说明</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">下载页面</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">添加组件</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isSearching ? (
+                      searchResults.length > 0 ? (
+                        searchResults
+                          .slice(0, showAllVersions ? undefined : 10)
+                          .map(item => renderVersionRow(item.url, item.releaseDate, item.type))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="text-center text-gray-500 py-4">没有找到匹配的版本</td>
+                        </tr>
+                      )
                     ) : (
-                      <li className="text-center text-gray-500 py-4">
-                        没有找到匹配的版本
-                      </li>
+                      selectedVersion === "all"
+                        ? Object.keys(versions)
+                          .sort((a, b) => parseInt(b) - parseInt(a))
+                          .flatMap(year => versions[year])
+                          .slice(0, showAllVersions ? undefined : 10)
+                          .map(v => renderVersionRow(v.url, v.releaseDate))
+                        : (versions[selectedVersion] || []).map(v => renderVersionRow(v.url, v.releaseDate))
                     )}
+                  </tbody>
+                </table>
+              </div>
 
-                    {!showAllVersions && searchResults.length > 10 && (
-                      <li>
-                        <Button
-                          variant="ghost"
-                          className="w-full"
-                          onClick={() => setShowAllVersions(true)}
-                        >
-                          显示更多搜索结果 ({searchResults.length - 10} 个) ↓
-                        </Button>
-                      </li>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {selectedVersion === "all"
-                      ? Object.keys(versions)
-                        .sort((a, b) => parseInt(b) - parseInt(a))
-                        .flatMap(year => versions[year])
-                        .filter(url => !searchQuery || getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase()))
-                        .slice(0, showAllVersions ? undefined : 5)
-                        .map(url => renderVersionItem(url))
-                      : filterVersions(versions[selectedVersion] || []).map(url => renderVersionItem(url))}
+              {!isSearching && !showAllVersions && selectedVersion === "all" && Object.keys(versions).flatMap(year => versions[year]).length > 10 && (
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={async () => {
+                      if (hasMore[versionType]) {
+                        await loadMoreForStream(versionType);
+                      }
+                      setShowAllVersions(true);
+                    }}
+                  >
+                    {hasMore[versionType] ? '加载更多版本 ↓' : `显示更多版本 (${Object.keys(versions).flatMap(year => versions[year]).length} 个) ↓`}
+                  </Button>
+                </div>
+              )}
 
-                    {!showAllVersions && selectedVersion === "all" && (
-                      Object.keys(versions)
-                        .flatMap(year => versions[year])
-                        .filter(url => !searchQuery || getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase()))
-                        .length > 5
-                    ) && (
-                      <li>
-                        <Button
-                          variant="ghost"
-                          className="w-full"
-                          onClick={() => setShowAllVersions(true)}
-                        >
-                          显示更多版本 ({Object.keys(versions)
-                            .flatMap(year => versions[year])
-                            .filter(url => !searchQuery || getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase()))
-                            .length} 个) ↓
-                        </Button>
-                      </li>
-                    )}
+              {!isSearching && !showAllVersions && selectedVersion !== "all" && (versions[selectedVersion] || []).length > 10 && (
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setShowAllVersions(true)}
+                  >
+                    显示更多版本 ({(versions[selectedVersion] || []).length} 个) ↓
+                  </Button>
+                </div>
+              )}
 
-                    {((selectedVersion === "all" &&
-                      Object.keys(versions)
-                        .flatMap(year => versions[year])
-                        .filter(url => !searchQuery || getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase()))
-                        .length === 0) ||
-                      (selectedVersion !== "all" && filterVersions(versions[selectedVersion] || []).length === 0)) &&
-                      searchQuery && (
-                        <li className="text-center text-gray-500 py-4">
-                          没有找到匹配的版本
-                        </li>
-                    )}
-                  </>
-                )}
-              </ul>
+              {isSearching && !showAllVersions && searchResults.length > 10 && (
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={async () => {
+                      const needsMore = Object.keys(hasMore).some(s => hasMore[s]);
+                      if (needsMore) {
+                        await Promise.all(
+                          Object.keys(hasMore).filter(s => hasMore[s]).map(s => loadMoreForStream(s))
+                        );
+                      }
+                      setShowAllVersions(true);
+                    }}
+                  >
+                    {Object.keys(hasMore).some(s => hasMore[s])
+                      ? '加载更多搜索结果 ↓'
+                      : `显示更多搜索结果 (${searchResults.length - 10} 个) ↓`}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
