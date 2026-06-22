@@ -1,4 +1,4 @@
-import {Download, Home, Share} from "lucide-react";
+import {Download, Home, Package, Share} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {CardContent} from "@/components/ui/card";
 
@@ -117,6 +117,14 @@ export default function DownloadPage({searchParams,}: {
                                             发行说明
                                         </div>
                                         {/*<span className="text-xs text-gray-500"></span>*/}
+                                    </div>
+                                </Button>
+                                <Button variant="secondary" className="w-full" size="lg" href={`./component?v=${version}`}>
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center">
+                                            <Package className="w-5 h-5 mr-2"/>
+                                            添加组件
+                                        </div>
                                     </div>
                                 </Button>
                                 <hr/>
