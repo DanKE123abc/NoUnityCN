@@ -85,10 +85,11 @@ export default function Page() {
 
   const [loadedOffsets, setLoadedOffsets] = useState<Record<string, number>>({});
   const [hasMore, setHasMore] = useState<Record<string, boolean>>({});
+  const [isFullyLoaded, setIsFullyLoaded] = useState(false);
 
-  const fetchStreamPage = async (stream: string, offset: number): Promise<{results: any[], total: number}> => {
+  const fetchStreamPage = async (stream: string, limit: number, offset: number): Promise<{results: any[], total: number}> => {
     try {
-      const res = await fetch(`/api/releases?limit=25&offset=${offset}&stream=${stream}`);
+      const res = await fetch(`/api/releases?limit=${limit}&offset=${offset}&stream=${stream}`);
       if (!res.ok) return { results: [], total: 0 };
       const data = await res.json();
       return { results: data.results || [], total: data.total || 0 };
@@ -97,67 +98,104 @@ export default function Page() {
     }
   };
 
+  const mergeResultsIntoData = (
+    prev: Record<string, Record<string, VersionInfo[]>>,
+    allResults: { stream: string; results: any[]; total: number }[]
+  ): { data: Record<string, Record<string, VersionInfo[]>>; offsets: Record<string, number>; more: Record<string, boolean> } => {
+    const next = { ...prev };
+    const newOffsets: Record<string, number> = {};
+    const newHasMore: Record<string, boolean> = {};
+
+    for (const { stream, results, total } of allResults) {
+      const grouped = groupReleasesByStreamAndYear(results);
+      for (const s of Object.keys(grouped)) {
+        const targetStream = s === "SUPPORTED" ? "TECH" : s;
+        if (!next[targetStream]) next[targetStream] = {};
+        for (const year of Object.keys(grouped[s])) {
+          if (!next[targetStream][year]) next[targetStream][year] = [];
+          next[targetStream][year].push(...grouped[s][year]);
+        }
+      }
+      const targetKey = stream === "SUPPORTED" ? "TECH" : stream;
+      newOffsets[targetKey] = (prev[targetKey] ? Object.values(prev[targetKey]).flat().length : 0) + results.length;
+      newHasMore[targetKey] = newOffsets[targetKey] < total;
+    }
+
+    for (const streamKey of Object.keys(next)) {
+      for (const year of Object.keys(next[streamKey])) {
+        next[streamKey][year].sort((a, b) => {
+          const aVer = a.url.split('/')[2].split('.')[1];
+          const bVer = b.url.split('/')[2].split('.')[1];
+          return bVer.localeCompare(aVer);
+        });
+      }
+    }
+
+    return { data: next, offsets: { ...prev, ...newOffsets }, more: newHasMore };
+  };
+
   useEffect(() => {
+    let cancelled = false;
+
     const fetchAllVersions = async () => {
       setIsLoading(true);
       try {
         const streams = ["TECH", "LTS", "BETA", "ALPHA", "SUPPORTED"];
-        const fetches = streams.map(stream =>
-          fetchStreamPage(stream, 0).then(d => ({ stream, ...d }))
-        );
-        const allResults = await Promise.all(fetches);
-        const allData: Record<string, Record<string, VersionInfo[]>> = {};
-        const newOffsets: Record<string, number> = {};
-        const newHasMore: Record<string, boolean> = {};
 
-        for (const { stream, results, total } of allResults) {
-          const grouped = groupReleasesByStreamAndYear(results);
-          for (const s of Object.keys(grouped)) {
-            const targetStream = s === "SUPPORTED" ? "TECH" : s;
-            if (!allData[targetStream]) allData[targetStream] = {};
-            for (const year of Object.keys(grouped[s])) {
-              if (!allData[targetStream][year]) allData[targetStream][year] = [];
-              allData[targetStream][year].push(...grouped[s][year]);
-            }
-          }
-          const targetKey = stream === "SUPPORTED" ? "TECH" : stream;
-          newOffsets[targetKey] = results.length;
-          newHasMore[targetKey] = results.length < total;
-        }
+        const quickFetches = streams.map(stream =>
+          fetchStreamPage(stream, 10, 0).then(d => ({ stream, ...d }))
+        );
+        const quickResults = await Promise.all(quickFetches);
+        if (cancelled) return;
+
+        let allData: Record<string, Record<string, VersionInfo[]>> = {};
+        let offsets: Record<string, number> = {};
+        let more: Record<string, boolean> = {};
+
+        const { data, offsets: o, more: m } = mergeResultsIntoData({}, quickResults);
+        allData = data;
+        offsets = o;
+        more = m;
 
         if (Object.keys(allData).length === 0) {
           allData["LTS"] = { "6000": [{ url: "unityhub://6000.0.38f1/82314a941f2d", releaseDate: "" }] };
         }
 
-        for (const stream of Object.keys(allData)) {
-          for (const year of Object.keys(allData[stream])) {
-            allData[stream][year].sort((a, b) => {
-              const aVer = a.url.split('/')[2].split('.')[1];
-              const bVer = b.url.split('/')[2].split('.')[1];
-              return bVer.localeCompare(aVer);
-            });
-          }
-        }
-
         setVersionsData(allData);
-        setLoadedOffsets(newOffsets);
-        setHasMore(newHasMore);
-      } catch (error) {
-        console.error('加载版本失败:', error);
-        setVersionsData({
-          "LTS": { "6000": [{ url: "unityhub://6000.0.38f1/82314a941f2d", releaseDate: "" }] }
-        });
-      } finally {
+        setLoadedOffsets(offsets);
+        setHasMore(more);
         setIsLoading(false);
+
+        const fullFetches = streams.map(stream =>
+          fetchStreamPage(stream, 999, 0).then(d => ({ stream, ...d }))
+        );
+        const fullResults = await Promise.all(fullFetches);
+        if (cancelled) return;
+
+        const { data: fullData, offsets: fullOffsets, more: fullMore } = mergeResultsIntoData({}, fullResults);
+        setVersionsData(fullData);
+        setLoadedOffsets(fullOffsets);
+        setHasMore(fullMore);
+        setIsFullyLoaded(true);
+      } catch (error) {
+        if (!cancelled) {
+          console.error('加载版本失败:', error);
+          setVersionsData({
+            "LTS": { "6000": [{ url: "unityhub://6000.0.38f1/82314a941f2d", releaseDate: "" }] }
+          });
+          setIsLoading(false);
+        }
       }
     };
 
     fetchAllVersions();
+    return () => { cancelled = true; };
   }, []);
 
   const loadMoreForStream = async (stream: string) => {
+    if (isFullyLoaded) return;
     const offset = loadedOffsets[stream] || 0;
-    const { results, total } = await fetchStreamPage(stream, offset);
+    const { results, total } = await fetchStreamPage(stream, 25, offset);
     if (results.length === 0) return;
 
     const grouped = groupReleasesByStreamAndYear(results);
@@ -328,6 +366,17 @@ export default function Page() {
             ))}
           </div>
 
+          <div className="relative mb-6 max-w-md mx-auto">
+            <Input
+              type="text"
+              placeholder="全局搜索版本..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10"
+            />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          </div>
+
           <Card className="mb-12">
             <CardHeader>
               <CardTitle>
@@ -341,17 +390,6 @@ export default function Page() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="relative mb-6">
-                <Input
-                  type="text"
-                  placeholder="全局搜索版本..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10"
-                />
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              </div>
-
               {!isSearching && (
                 <div className="flex space-x-4 mb-4 overflow-x-auto flex-nowrap pb-2">
                   <Button
@@ -412,30 +450,33 @@ export default function Page() {
 
               {!isSearching && !showAllVersions && selectedVersion === "all" && Object.keys(versions).flatMap(year => versions[year]).length > 10 && (
                 <div className="mt-4">
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    onClick={async () => {
-                      if (hasMore[versionType]) {
-                        await loadMoreForStream(versionType);
-                      }
-                      setShowAllVersions(true);
-                    }}
-                  >
-                    {hasMore[versionType] ? '加载更多版本 ↓' : `显示更多版本 (${Object.keys(versions).flatMap(year => versions[year]).length} 个) ↓`}
-                  </Button>
+                  {!isFullyLoaded ? (
+                    <div className="text-center text-sm text-gray-400 py-2">全量数据加载中...</div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowAllVersions(true)}
+                    >
+                      显示更多版本 ({Object.keys(versions).flatMap(year => versions[year]).length} 个) ↓
+                    </Button>
+                  )}
                 </div>
               )}
 
               {!isSearching && !showAllVersions && selectedVersion !== "all" && (versions[selectedVersion] || []).length > 10 && (
                 <div className="mt-4">
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => setShowAllVersions(true)}
-                  >
-                    显示更多版本 ({(versions[selectedVersion] || []).length} 个) ↓
-                  </Button>
+                  {!isFullyLoaded ? (
+                    <div className="text-center text-sm text-gray-400 py-2">全量数据加载中...</div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowAllVersions(true)}
+                    >
+                      显示更多版本 ({(versions[selectedVersion] || []).length} 个) ↓
+                    </Button>
+                  )}
                 </div>
               )}
 
@@ -444,19 +485,9 @@ export default function Page() {
                   <Button
                     variant="ghost"
                     className="w-full"
-                    onClick={async () => {
-                      const needsMore = Object.keys(hasMore).some(s => hasMore[s]);
-                      if (needsMore) {
-                        await Promise.all(
-                          Object.keys(hasMore).filter(s => hasMore[s]).map(s => loadMoreForStream(s))
-                        );
-                      }
-                      setShowAllVersions(true);
-                    }}
+                    onClick={() => setShowAllVersions(true)}
                   >
-                    {Object.keys(hasMore).some(s => hasMore[s])
-                      ? '加载更多搜索结果 ↓'
-                      : `显示更多搜索结果 (${searchResults.length - 10} 个) ↓`}
+                    显示更多搜索结果 ({searchResults.length - 10} 个) ↓
                   </Button>
                 </div>
               )}
