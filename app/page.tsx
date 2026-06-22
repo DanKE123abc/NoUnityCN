@@ -3,8 +3,9 @@ import { Download, Share, Box, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
+import HeroSection from "@/components/hero-section";
 
 interface VersionInfo {
   url: string;
@@ -226,6 +227,16 @@ export default function Page() {
 
   const versions = versionsData[versionType] || {};
 
+  const latestVersion = useMemo(() => {
+    const techVersions = versionsData["TECH"];
+    if (!techVersions) return { version: "", date: "", url: "" };
+    const years = Object.keys(techVersions).sort((a, b) => parseInt(b) - parseInt(a));
+    if (years.length === 0) return { version: "", date: "", url: "" };
+    const latest = techVersions[years[0]]?.[0];
+    if (!latest) return { version: "", date: "", url: "" };
+    return { version: latest.url.split("://")[1].split("/")[0] || "", date: latest.releaseDate || "", url: latest.url };
+  }, [versionsData]);
+
   useEffect(() => {
     if (searchQuery) {
       setIsSearching(true);
@@ -324,17 +335,19 @@ export default function Page() {
     </tr>
   );
 
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isLoading]);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
-        {isLoading && (
-          <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
-            <div className="text-center">
-              <div className="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent rounded-full mb-2"></div>
-              <p className="text-lg text-gray-700">加载中...</p>
-            </div>
-          </div>
-        )}
+      <HeroSection isLoading={isLoading} version={latestVersion.version} releaseDate={latestVersion.date} downloadUrl={latestVersion.url} />
+      <main className="flex-1 bg-white scroll-mt-16" id="download-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">下载 Unity</h2>

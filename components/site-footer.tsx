@@ -1,13 +1,14 @@
 const footerNavigation = {
   产品: [
     { name: "下载 Unity Editor", href: "/" },
+    { name: "下载 Unity Hub", href: "/unityhub" },
   ],
   资源: [
     { name: "Unity Editor 官方文档", href: "https://docs.unity3d.com/Manual/index.html" },
   ],
   更多: [
     { name: "GitHub", href: "https://github.com/NoUnityCN/NoUnityCN"},
-  ]
+  ],
 }
 
 export function SiteFooter() {
