@@ -1,0 +1,981 @@
+openapi: 3.0.3
+info:
+  title: Release API
+  version: "1.0"
+  description: >
+    ## Overview
+
+
+    The Unity Release API allows developers to get the Unity Editor's release data. As well as Unity Editor release information such as release notes and date, this includes the download and module metadata associated with a Unity Editor release.
+    <br/><br/>
+    Developers can use this as part of their CI processes to target latest versions of the editor, or maybe to display Unity versions and associated metadata in an administrative tool.
+
+
+    ## Rate Limits
+
+
+    These APIs have rate limiting in place. Requests are limited to 10 request per second and 1000 requests per thirty minutes per endpoint.
+    The APIs respond with a `429` HTTP status code if the rate limit is exceeded.
+
+
+    ## Changelog
+
+
+    This section contains a list of the changes of the API. 
+
+
+    ### v1
+
+
+    * January 19, 2023: Initial Release
+components:
+  schemas:
+    UnityReleaseDigitalValue:
+      description: A Unity Release Digital Value as defined on Release Live Platform.
+      type: object
+      properties:
+        value:
+          type: number
+          description: The value of the Unity Release Digital Value.
+          example: 1524000000
+        unit:
+          type: string
+          enum:
+            - BYTE
+            - KILOBYTE
+            - MEGABYTE
+            - GIGABYTE
+          description: The unit of the Unity Release Digital Value.
+          nullable: false
+          example: "BYTE"
+      required:
+        - value
+        - unit
+    UnityReleaseNotes:
+      description: A Unity Release Notes File as defined on Release Live Platform.
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL of the Unity Release notes.
+          example: "https://storage.googleapis.com/live-platform-resources-prd/templates/assets/2020_3_44f1_750922b691/2020_3_44f1_750922b691.md"
+        integrity:
+          type: string
+          description: >-
+            The Subresource Integrity of the Unity Release notes as defined by
+            the [W3C Recommendation Subresource
+            Integrity](https://www.w3.org/TR/SRI/). For example,
+            `sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo=`.
+          example: "sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo="
+        type:
+          type: string
+          enum:
+            - TEXT
+            - TAR_GZ
+            - TAR_XZ
+            - ZIP
+            - PKG
+            - EXE
+            - PO
+            - DMG
+            - LZMA
+            - LZ4
+            - MD
+            - PDF
+          description: The file type of the Unity Release notes.
+          nullable: false
+          example: "MD"
+      required:
+        - url
+        - type
+    UnityReleaseThirdPartyNotice:
+      description: >-
+        A Unity Release Third Party Notice File as defined on Release Live
+        Platform.
+      type: object
+      properties:
+        originalFileName:
+          type: string
+          description: The original file name of the Unity Release Third Party Notice.
+          example: "2020.3.26f1-WinPlayerNoDevelopment-release.pdf"
+        url:
+          type: string
+          description: The URL of the Unity Release Third Party Notice.
+          example: "https://storage.googleapis.com/live-platform-resources-prd/templates/assets/2020_3_26f1_Win_Player_No_Development_release_ff4b1c5e4a/2020_3_26f1_Win_Player_No_Development_release_ff4b1c5e4a.pdf"
+        integrity:
+          type: string
+          description: >-
+            The Subresource Integrity of the Unity Release Third Party Notice as
+            defined by the [W3C Recommendation Subresource
+            Integrity](https://www.w3.org/TR/SRI/). For example,
+            `sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo=`.
+          example: "sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo="
+        type:
+          type: string
+          enum:
+            - TEXT
+            - TAR_GZ
+            - TAR_XZ
+            - ZIP
+            - PKG
+            - EXE
+            - PO
+            - DMG
+            - LZMA
+            - LZ4
+            - MD
+            - PDF
+          description: The file type of the Unity Release Third Party Notice.
+          nullable: false
+          example: "PDF"
+      required:
+        - originalFileName
+        - url
+        - type
+    UnityReleaseModuleEula:
+      description: A Unity Release module end-user license agreement.
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL of the Unity Release module end-user license agreement.
+          example: "https://go.microsoft.com/fwlink/?linkid=2092535"
+        integrity:
+          type: string
+          description: >-
+            The Subresource Integrity of the Unity Release module end-user
+            license agreement as defined by the [W3C Recommendation Subresource
+            Integrity](https://www.w3.org/TR/SRI/). For example,
+            `sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo=`.
+          example: "sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo="
+        type:
+          type: string
+          enum:
+            - TEXT
+            - TAR_GZ
+            - TAR_XZ
+            - ZIP
+            - PKG
+            - EXE
+            - PO
+            - DMG
+            - LZMA
+            - LZ4
+            - MD
+            - PDF
+          description: >-
+            The file type of the Unity Release module end-user license
+            agreement.
+          nullable: false
+          example: "TEXT"
+        label:
+          type: string
+          description: The label of the Unity Release module end-user license agreement.
+          example: "Visual Studio for Mac License Terms"
+        message:
+          type: string
+          description: The message of the Unity Release module end-user license agreement.
+          example: "Please review and accept the license terms before downloading and installing Visual Studio for Mac and Mono."
+      required:
+        - url
+        - type
+        - label
+        - message
+    UnityReleaseModuleExtractedPathRename:
+      description: A Unity Release Module Extracted Path Rename.
+      type: object
+      properties:
+        from:
+          type: string
+          description: The location of the module when extracted.
+          example: "{UNITY_PATH}/Editor/Data/PlaybackEngines/AndroidPlayer/NDK/android-ndk-r19"
+        to:
+          type: string
+          description: The location the module must be moved to.
+          example: "{UNITY_PATH}/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
+      required:
+        - from
+        - to
+    UnityReleaseModule:
+      description: A Unity Release module.
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the Unity Release module.
+          example: "android-ndk-r19"
+        slug:
+          type: string
+          description: >-
+            The slug of the Unity Release module. This is unique across all
+            Unity Release Modules.
+          example: "2020.3.44f1-windows-x86_64-android-ndk-r19"
+        name:
+          type: string
+          description: The name of the Unity Release module.
+          example: "Android NDK"
+        description:
+          type: string
+          description: The description of the Unity Release module.
+          example: "Android NDK r19"
+        category:
+          type: string
+          enum:
+            - DOCUMENTATION
+            - PLATFORM
+            - LANGUAGE_PACK
+            - DEV_TOOL
+            - PLUGIN
+            - COMPONENT
+          description: The category of the Unity Release module.
+          nullable: false
+          example: "PLATFORM"
+        url:
+          type: string
+          description: The URL of the Unity Release module.
+          example: "https://dl.google.com/android/repository/android-ndk-r19-windows-x86_64.zip"
+        integrity:
+          type: string
+          description: >-
+            The Subresource Integrity of the Unity Release module as defined by
+            the [W3C Recommendation Subresource
+            Integrity](https://www.w3.org/TR/SRI/). For example,
+            `sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo=`.
+          example: "sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo="
+        type:
+          type: string
+          enum:
+            - TEXT
+            - TAR_GZ
+            - TAR_XZ
+            - ZIP
+            - PKG
+            - EXE
+            - PO
+            - DMG
+            - LZMA
+            - LZ4
+            - MD
+            - PDF
+          description: The file type of the Unity Release module.
+          nullable: false
+          example: "ZIP"
+        downloadSize:
+          $ref: "#/components/schemas/UnityReleaseDigitalValue"
+          description: The download size of the Unity Release module.
+        installedSize:
+          $ref: "#/components/schemas/UnityReleaseDigitalValue"
+          description: The installed size of the Unity Release module.
+        subModules:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnityReleaseModule"
+          nullable: true
+          description: >-
+            The optional sub-modules of the Unity Release module. The parent
+            must be downloaded to download a sub-module.
+          example: []
+        required:
+          type: boolean
+          description: >-
+            The indicator for whether the Unity Release module needs to be
+            downloaded if the parent is downloaded.
+          example: true
+        hidden:
+          type: boolean
+          description: >-
+            The indicator for whether the Unity Release module needs to be
+            hidden when displaying modules in a UI.
+          example: true
+        extractedPathRename:
+          $ref: "#/components/schemas/UnityReleaseModuleExtractedPathRename"
+          description: >-
+            The location to move a Unity Release Module when extracted or
+            unzipped.
+        preSelected:
+          type: boolean
+          description: >-
+            The indicator for whether the Unity Release module should be
+            pre-selected.
+          example: false
+        destination:
+          type: string
+          description: The file destination of the Unity Release module.
+          example: "{UNITY_PATH}/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
+        eula:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnityReleaseModuleEula"
+          nullable: true
+          description: The end-user license agreements of the Unity Release module.
+          example: []
+      required:
+        - id
+        - slug
+        - name
+        - description
+        - category
+        - url
+        - type
+        - downloadSize
+        - installedSize
+        - required
+        - hidden
+        - preSelected
+    UnityReleaseDownload:
+      description: A Unity Release Hub download.
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL of the Unity Release Hub download.
+          example: "https://download.unity3d.com/download_unity/7f159b6136da/Windows64EditorInstaller/UnitySetup64-2020.3.44f1.exe"
+        integrity:
+          type: string
+          description: >-
+            The Subresource Integrity of the Unity Release Hub download as
+            defined by the [W3C Recommendation Subresource
+            Integrity](https://www.w3.org/TR/SRI/). For example,
+            `sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo=`.
+          example: "sha1-OTVjZTI0ZTk5MDg0YTMyYTBmZTdiNTU1NTMwZGRhYjQ3OWMzYzc1MQo="
+        type:
+          type: string
+          enum:
+            - TEXT
+            - TAR_GZ
+            - TAR_XZ
+            - ZIP
+            - PKG
+            - EXE
+            - PO
+            - DMG
+            - LZMA
+            - LZ4
+            - MD
+            - PDF
+          description: The file type of the Unity Release Hub download.
+          nullable: false
+          example: "EXE"
+        platform:
+          type: string
+          enum:
+            - MAC_OS
+            - LINUX
+            - WINDOWS
+          description: The platform of the Unity Release Hub download.
+          nullable: false
+          example: "WINDOWS"
+        architecture:
+          type: string
+          enum:
+            - X86_64
+            - ARM64
+          description: The architecture of the Unity Release Hub download.
+          nullable: false
+          example: "X86_64"
+        downloadSize:
+          $ref: "#/components/schemas/UnityReleaseDigitalValue"
+          description: The download size of the Unity Release Hub download.
+        installedSize:
+          $ref: "#/components/schemas/UnityReleaseDigitalValue"
+          description: The installed size of the Unity Release Hub download.
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnityReleaseModule"
+          nullable: false
+          description: The modules of the Unity Release Hub download.
+      required:
+        - url
+        - type
+        - platform
+        - architecture
+        - downloadSize
+        - installedSize
+        - modules
+    UnityRelease:
+      description: A Unity Release.
+      type: object
+      properties:
+        version:
+          type: string
+          description: The version of the Unity Release.
+          example: "2020.3.44f1"
+        releaseDate:
+          type: string
+          description: The release date of the Unity Release.
+          example: "2023-01-18T17:25:53.109Z"
+        releaseNotes:
+          $ref: "#/components/schemas/UnityReleaseNotes"
+          description: The release notes of the Unity Release.
+        stream:
+          type: string
+          enum:
+            - LTS
+            - BETA
+            - ALPHA
+            - TECH
+          description: The release stream of the Unity Release.
+          nullable: false
+          example: "LTS"
+        downloads:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnityReleaseDownload"
+          nullable: false
+          description: The downloads of the Unity Release.
+        skuFamily:
+          type: string
+          enum:
+            - DOTS
+            - CLASSIC
+          description: The SKU family of the Unity Release.
+          nullable: false
+          example: "CLASSIC"
+        recommended:
+          type: boolean
+          description: >-
+            The indicator for whether the Unity Release is the recommended LTS
+            version.
+          example: false
+        unityHubDeepLink:
+          type: string
+          description: The Unity Hub deep link of the Unity Release.
+          example: "unityhub://2020.3.44f1/7f159b6136da"
+        shortRevision:
+          type: string
+          description: The Git Short Revision of the Unity Release.
+          example: "7f159b6136da"
+        thirdPartyNotices:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnityReleaseThirdPartyNotice"
+          nullable: false
+          description: The Third Party Notices of the Unity Release.
+          example: []
+      required:
+        - version
+        - releaseDate
+        - releaseNotes
+        - stream
+        - downloads
+        - skuFamily
+        - recommended
+        - unityHubDeepLink
+        - shortRevision
+        - thirdPartyNotices
+    UnityReleaseOffsetConnection:
+      description: A relay style offset paginated Unity Release Connection.
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: The input offset of the Unity Release Offset Connection.
+          example: 0
+        limit:
+          type: integer
+          description: The input limit of the Unity Release Offset Connection.
+          example: 10
+        total:
+          type: integer
+          description: >-
+            The total count of all available Unity Releases in the Unity Release
+            Offset Connection.
+          example: 1027
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnityRelease"
+          nullable: false
+          description: The list of Unity Releases in the Unity Release Offset Connection.
+      required:
+        - offset
+        - limit
+        - total
+        - results
+    GetUnityReleaseValidationError:
+      description: The Unity Release Bad Request Error.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the Validation Error.
+          example: "Bad Request"
+        status:
+          type: integer
+          description: The HTTP status code of the Validation Error.
+          example: 400
+        detail:
+          type: string
+          description: The detail of the Validation Error.
+          example: "querystring.limit should be integer"
+      required:
+        - title
+        - status
+        - detail
+    GetUnityReleaseInternalServerError:
+      description: The Unity Release Internal Server Error.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the Internal Server Error.
+          example: "Internal Server Error"
+        status:
+          type: integer
+          description: The HTTP status code of the Internal Server Error.
+          example: 500
+        detail:
+          type: string
+          description: The detail of the Internal Server Error.
+          example: "An unknown error occurred"
+      required:
+        - title
+        - status
+        - detail
+    GetUnityReleaseServiceUnavailableError:
+      description: The Unity Release Service Unavailable Error.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the Service Unavailable Error.
+          example: "Service Unavailable"
+        status:
+          type: integer
+          description: The HTTP status code of the Service Unavailable Error.
+          example: 503
+        detail:
+          type: string
+          description: The detail of the Service Unavailable Error.
+          example: "Service health ping failed"
+      required:
+        - title
+        - status
+        - detail
+paths:
+  /unity/editor/release/v1/releases:
+    get:
+      operationId: getUnityReleases
+      summary: Get Unity Releases
+      tags:
+        - Release
+      description: >
+        Get Unity Releases.
+
+        > **Note:** Any unpublished Unity Release will not appear in the queries.
+
+
+        With this request, you can get all the Unity Editor Releases. For retrieving releases, we use offset-based pagination.
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl
+        'https://services.api.unity.com/unity/editor/release/v1/releases?limit=10&offset=0'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 1025,
+          "results": [
+            {
+              "version": "2023.1.0a22",
+              "releaseDate": "2022-12-07T21:25:31.942Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        > **Info:** If an internal error occurs, an empty list will be returned.
+
+        > **Note:** Do you need more examples on how to query for Unity Releases?
+        Check out these examples!
+
+        ### Order by release date
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl
+        'https://services.api.unity.com/unity/editor/release/v1/releases?order=RELEASE_DATE_ASC'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 1025,
+          "results": [
+            {
+              "version": "5.0.0f4",
+              "releaseDate": "2015-02-25T15:49:05.835Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        ### Filter by Unity Release stream
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl 'https://services.api.unity.com/unity/editor/release/v1/releases?stream=LTS'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 391,
+          "results": [
+            {
+              "version": "2021.3.15f1",
+              "releaseDate": "2022-12-01T17:20:58.301Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        ### Filter by Unity Release download platform
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl
+        'https://services.api.unity.com/unity/editor/release/v1/releases?platform=WINDOWS'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 1013,
+          "results": [
+            {
+              "version": "2023.1.0a22",
+              "releaseDate": "2022-12-07T21:25:31.942Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        ### Filter by Unity Release download architecture
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl
+        'https://services.api.unity.com/unity/editor/release/v1/releases?architecture=X86_64'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 1013,
+          "results": [
+            {
+              "version": "2023.1.0a22",
+              "releaseDate": "2022-12-07T21:25:31.942Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        ### Filter by a Unity Release version
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl
+        'https://services.api.unity.com/unity/editor/release/v1/releases?version=2023.1.0a22'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 1,
+          "results": [
+            {
+              "version": "2023.1.0a22",
+              "releaseDate": "2022-12-07T21:25:31.942Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        ### Filter by a Unity Release major-minor version
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl
+        'https://services.api.unity.com/unity/editor/release/v1/releases?version=2023.1'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 20,
+          "results": [
+            {
+              "version": "2023.1.0a22",
+              "releaseDate": "2022-12-07T21:25:31.942Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+
+
+        ### Filter by a Unity Release major version
+
+
+        **Make request:**
+
+
+        ```bash
+
+        curl 'https://services.api.unity.com/unity/editor/release/v1/releases?version=2023'
+
+        ```
+
+
+        **Response:**
+
+
+        ```jsonc
+
+        {
+          "offset": 0,
+          "limit": 10,
+          "total": 20,
+          "results": [
+            {
+              "version": "2023.1.0a22",
+              "releaseDate": "2022-12-07T21:25:31.942Z"
+              // ...
+            }
+            // ...
+          ]
+        }
+
+        ```
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 25
+          description: Limits the number of results returned per page (min 1, max 25).
+          example: 10
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: Offsets the first n elements from the results.
+          example: 0
+        - in: query
+          name: order
+          required: false
+          schema:
+            type: string
+            enum:
+              - RELEASE_DATE_ASC
+              - RELEASE_DATE_DESC
+            nullable: true
+            default: RELEASE_DATE_DESC
+          description: Orders the returned results by Get Unity Releases Order.
+          example: "RELEASE_DATE_DESC"
+        - in: query
+          name: stream
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - LTS
+                - BETA
+                - ALPHA
+                - TECH
+              description: Possible release streams of Unity Release.
+            nullable: true
+            default: []
+          description: Filters by Unity Release stream.
+          example: ["LTS"]
+        - in: query
+          name: platform
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - MAC_OS
+                - LINUX
+                - WINDOWS
+              description: Possible platforms of Unity Release download.
+            nullable: true
+            default: []
+          description: Filters by Unity Release download platform.
+          example: ["WINDOWS"]
+        - in: query
+          name: architecture
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - X86_64
+                - ARM64
+              description: Possible architectures of Unity Release download.
+            nullable: true
+            default: []
+          description: Filters by Unity Release download architecture.
+          example: ["X86_64"]
+        - in: query
+          name: version
+          required: false
+          schema:
+            type: string
+            maxLength: 20
+            format: valid-string
+          description: Filters by a full text search on the version string.
+          example: "2020.3.44f1"
+      responses:
+        "200":
+          description: The Get Unity Releases response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnityReleaseOffsetConnection"
+                description: The Get Unity Releases response.
+        "400":
+          description: The Unity Release Validation Error response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUnityReleaseValidationError"
+                description: The Unity Release Validation Error response.
+        "500":
+          description: The Unity Release Internal Server Error response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUnityReleaseInternalServerError"
+                description: The Unity Release Internal Server Error response.
+        "503":
+          description: The Unity Release Service Unavailable Error response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUnityReleaseServiceUnavailableError"
+                description: The Unity Release Service Unavailable Error response.
+servers:
+  - url: https://services.api.unity.com
+security: []
+tags:
+  - name: Release
+    description: The Unity Release operations.

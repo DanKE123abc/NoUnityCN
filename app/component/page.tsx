@@ -14,6 +14,7 @@ export default function ComponentPage({searchParams,}: {
     const IOS_BS = "iOS";
     const WEBGL_BS = "WebGL";
     const APPLETV_BS = "AppleTV";
+    const VISIONOS_BS = "VisionOS";
     const LINUX_IL2CPP_BS = 'Linux-IL2CPP';
     const LINUX_MONO_BS = "Linux-Mono";
     const LINUX_SERVER_BS = "Linux-Server";
@@ -141,6 +142,11 @@ export default function ComponentPage({searchParams,}: {
                                             Apple tvOS Build Support
                                         </Button>
                                         <Button variant="secondary" className="w-full" size="lg"
+                                                href={parseLinkwin(VISIONOS_BS, version)}>
+                                            <Download className="w-5 h-5 mr-2"/>
+                                            VisionOS Build Support
+                                        </Button>
+                                        <Button variant="secondary" className="w-full" size="lg"
                                                 href={parseLinkwin(LINUX_IL2CPP_BS, version)}>
                                             <Download className="w-5 h-5 mr-2"/>
                                             Linux Build Support (IL2CPP)
@@ -213,6 +219,11 @@ export default function ComponentPage({searchParams,}: {
                                                 href={parseLinkmac(APPLETV_BS, version)}>
                                             <Download className="w-5 h-5 mr-2"/>
                                             Apple tvOS Build Support
+                                        </Button>
+                                        <Button variant="secondary" className="w-full" size="lg"
+                                                href={parseLinkmac(VISIONOS_BS, version)}>
+                                            <Download className="w-5 h-5 mr-2"/>
+                                            VisionOS Build Support
                                         </Button>
                                         <Button variant="secondary" className="w-full" size="lg"
                                                 href={parseLinkmac(LINUX_IL2CPP_BS, version)}>
