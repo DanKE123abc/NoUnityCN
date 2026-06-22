@@ -6,8 +6,7 @@ const footerNavigation = {
     { name: "Unity Editor 官方文档", href: "https://docs.unity3d.com/Manual/index.html" },
   ],
   更多: [
-    { name: "服务状态", href: "https://nounitycn.github.io/service/"},
-    { name: "GitHub", href: "https://github.com/NoUnityCN/NoUnityCN"}
+    { name: "GitHub", href: "https://github.com/NoUnityCN/NoUnityCN"},
   ]
 }
 
