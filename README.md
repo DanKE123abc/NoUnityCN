@@ -1,6 +1,9 @@
 # NoUnityCN
 
+## 旧API失效，全新版本正在开发
+
 #### 官方网址：[nounitycn.top](https://nounitycn.top/)
+
 
 NoUnityCN是一项大家一起实现的开源项目，我们旨在为有中文使用需求的海外Unity开发者提供Unity Editor版本检索服务，我们不会保留任何数据。
 
