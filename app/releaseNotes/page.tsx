@@ -1,4 +1,5 @@
 import { micromark } from 'micromark';
+import { headers } from 'next/headers';
 
 interface UnityReleaseData {
     results: {
@@ -7,8 +8,11 @@ interface UnityReleaseData {
 }
 
 async function fetchReleaseNotes(version: string): Promise<UnityReleaseData> {
-    const url = `https://services.api.unity.com/unity/editor/release/v1/releases?version=${encodeURIComponent(version)}`;
-    const res = await fetch(url);
+    const h = await headers();
+    const host = h.get('host') || 'localhost:3000';
+    const protocol = h.get('x-forwarded-proto') || 'http';
+    const url = `${protocol}://${host}/api/releases?version=${encodeURIComponent(version)}`;
+    const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`API 请求失败: ${res.status}`);
     return await res.json() as UnityReleaseData;
 }

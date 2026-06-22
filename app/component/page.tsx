@@ -49,22 +49,22 @@ export default function ComponentPage({searchParams,}: {
 
     // Builtin Shaders
     function parseLinkBS(key:string) {
-        let downloadLink = `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/builtin_shaders-${parseUnityHubUri(key)?.version}.zip`;
+        let downloadLink = `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/builtin_shaders-${parseUnityHubUri(key)?.version}.zip`;
         return downloadLink;
     }
 
     function parseLinkwin(bs:string , key:string) {
-        let downloadLink = `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/TargetSupportInstaller/UnitySetup-${bs}-Support-for-Editor-${parseUnityHubUri(key)?.version}.exe`;
+        let downloadLink = `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/TargetSupportInstaller/UnitySetup-${bs}-Support-for-Editor-${parseUnityHubUri(key)?.version}.exe`;
         return downloadLink;
     }
 
     function parseLinkmac(bs:string , key:string) {
-        let downloadLink = `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/MacEditorTargetInstaller/UnitySetup-${bs}-Support-for-Editor-${parseUnityHubUri(key)?.version}.pkg`;
+        let downloadLink = `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/MacEditorTargetInstaller/UnitySetup-${bs}-Support-for-Editor-${parseUnityHubUri(key)?.version}.pkg`;
         return downloadLink;
     }
 
     function parseLinklinux(bs:string , key:string) {
-        let downloadLink = `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/LinuxEditorTargetInstaller/UnitySetup-${bs}-Support-for-Editor-${parseUnityHubUri(key)?.version}.tar.xz`;
+        let downloadLink = `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/LinuxEditorTargetInstaller/UnitySetup-${bs}-Support-for-Editor-${parseUnityHubUri(key)?.version}.tar.xz`;
         return downloadLink;
     }
 

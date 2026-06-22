@@ -6,9 +6,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import Inform from "@/components/inform";
-
-
 // --- 枚举类型定义 ---
 
 enum UnityReleaseDownloadArchitecture {
@@ -32,19 +29,6 @@ enum UnityReleaseStream {
 enum UnityReleaseEntitlement {
     XLTS = 'XLTS',
     U7ALPHA = 'U7ALPHA'
-}
-
-interface FetchReleaseOptions {
-    architecture?: UnityReleaseDownloadArchitecture[];
-    platform?: UnityReleaseDownloadPlatform[];
-    stream?: UnityReleaseStream[];
-    entitlements?: UnityReleaseEntitlement[];
-    version: string;
-}
-
-interface FetchReleaseRequestBody {
-    query: string;
-    variables: FetchReleaseOptions;
 }
 
 interface EulaEntry {
@@ -113,140 +97,6 @@ interface Module {
     renameFrom: string;
     preselected: boolean;
 }
-
-// --- GraphQL 查询字符串 ---
-// 这是 fetch_release_query.graphql 文件的内容
-const FETCH_RELEASE_QUERY = `
-query FetchReleaseQuery(
-  $architecture: [UnityReleaseDownloadArchitecture!]
-  $platform: [UnityReleaseDownloadPlatform!]
-  $stream: [UnityReleaseStream!]
-  $version: String
-  $entitlements: [UnityReleaseEntitlement!]
-) {
-  getUnityReleases(
-    architecture: $architecture
-    platform: $platform
-    skip: 0
-    limit: 1
-    stream: $stream
-    version: $version
-    entitlements: $entitlements
-  ) {
-    edges {
-      node {
-        version
-        productName
-        releaseDate
-        releaseNotes {
-          ...ReleaseNotesFields
-        }
-        stream
-        skuFamily
-        recommended
-        unityHubDeepLink
-        shortRevision
-        downloads {
-          ...UnityReleaseHubDownloadFields
-        }
-        thirdPartyNotices {
-      \t\turl
-          integrity
-          type
-          originalFileName
-        }
-      }
-    }
-    totalCount
-  }
-}
-
-fragment ReleaseNotesFields on UnityReleaseNotes {
-  url
-  integrity
-  type
-}
-
-fragment UnityReleaseHubDownloadFields on UnityReleaseHubDownload {
-  url
-  integrity
-  type
-  platform
-  architecture
-  modules {
-    ...UnityReleaseModuleFields_Level1
-  }
-  downloadSize(format: BYTE) {
-    value
-    unit
-  }
-  installedSize(format: BYTE) {
-    value
-    unit
-  }
-}
-
-fragment UnityReleaseModuleFields_Level1 on UnityReleaseModule {
-  ...UnityReleaseModuleCommonFields
-  subModules {
-    ...UnityReleaseModuleFields_Level2
-  }
-}
-
-fragment UnityReleaseModuleFields_Level2 on UnityReleaseModule {
-  ...UnityReleaseModuleCommonFields
-  subModules {
-    ...UnityReleaseModuleFields_Level3
-  }
-}
-
-fragment UnityReleaseModuleFields_Level3 on UnityReleaseModule {
-  ...UnityReleaseModuleCommonFields
-  subModules {
-    name
-    slug
-    id
-    description
-    url
-    destination
-  }
-}
-
-fragment UnityReleaseModuleCommonFields on UnityReleaseModule {
-  __typename
-  url
-  integrity
-  type
-  id
-  slug
-  name
-  description
-  category
-  required
-  hidden
-  preSelected
-  destination
-  extractedPathRename {
-    from
-    to
-  }
-  downloadSize(format: BYTE) {
-    unit
-    value
-  }
-  installedSize(format: BYTE) {
-    unit
-    value
-  }
-  eula {
-    url
-    integrity
-    type
-    label
-    message
-  }
-}
-`;
 
 // --- URI 解析函数 ---
 function parseUnityHubUri(uri: string) {
@@ -423,34 +273,16 @@ const UnityModuleFetcherInner: React.FC = () => {
         setError(null);
         setModules(null);
 
-        // --- 使用用户选择的值构建请求体 ---
-        const variables: FetchReleaseOptions = {
-            architecture: [selectedArchitecture],
-            platform: [selectedPlatform],
-            version: parsedVersion,
-        };
-
-        // 只有当用户选择了 Stream 或 Entitlements 时才添加到 variables
-        if (selectedStream) {
-            variables.stream = [selectedStream];
-        }
+        const params = new URLSearchParams({ version: parsedVersion });
+        if (selectedPlatform) params.set('platform', selectedPlatform);
+        if (selectedArchitecture) params.set('architecture', selectedArchitecture);
+        if (selectedStream) params.set('stream', selectedStream);
         if (selectedEntitlements.length > 0) {
-            variables.entitlements = selectedEntitlements;
+            selectedEntitlements.forEach(e => params.append('entitlement', e));
         }
-
-        const requestBody: FetchReleaseRequestBody = {
-            query: FETCH_RELEASE_QUERY,
-            variables,
-        };
 
         try {
-            const response = await fetch('https://live-platform-api.prd.ld.unity3d.com/graphql', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            });
+            const response = await fetch(`/api/releases?${params.toString()}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -458,17 +290,18 @@ const UnityModuleFetcherInner: React.FC = () => {
 
             const data = await response.json();
 
-            // 检查 GraphQL 错误
-            if (data.errors && data.errors.length > 0) {
-                throw new Error(`GraphQL Errors: ${JSON.stringify(data.errors)}`);
+            const release = data.results?.[0];
+            if (!release) {
+                throw new Error('未找到该版本的发布信息。');
             }
 
+            const download = release.downloads?.find(
+                (d: any) => d.platform === selectedPlatform && d.architecture === selectedArchitecture
+            ) || release.downloads?.[0];
 
-            const modulesOnline =
-                data?.data?.getUnityReleases?.edges?.[0]?.node?.downloads?.[0]
-                    ?.modules;
+            const modulesOnline = download?.modules;
 
-            if (!modulesOnline) {
+            if (!modulesOnline || modulesOnline.length === 0) {
                 throw new Error('返回的数据结构异常，未找到模块列表。');
             }
 
@@ -484,7 +317,7 @@ const UnityModuleFetcherInner: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [parsedVersion, selectedArchitecture, selectedPlatform, selectedStream, selectedEntitlements]); // 添加了所有相关状态作为依赖
+    }, [parsedVersion, selectedArchitecture, selectedPlatform, selectedStream, selectedEntitlements]);
 
     const handleDownloadJson = useCallback(() => {
         if (!modules) return;
@@ -527,9 +360,6 @@ const UnityModuleFetcherInner: React.FC = () => {
 
     return (
         <>
-            {/*公告组件*/}
-            <Inform filename="UnityModule" position="top-right" theme="yellow" />
-
             <br/>
             <div className="max-w-3xl mx-auto my-8 p-8 bg-white rounded-2xl shadow-xl border border-gray-100 space-y-8">
                 {/* 头部标题 */}

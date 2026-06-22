@@ -3,50 +3,65 @@ import { Download, Share, Box, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
-import {Inform} from "@/components/inform";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 type VersionDictionary = Record<string, string[]>;
 
-export default function Page() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+function extractFileId(downloadUrl: string): string | null {
+  const match = downloadUrl.match(/download_unity\/([^/]+)\//);
+  return match ? match[1] : null;
+}
 
-  useEffect(() => {
-    // 检查cookie是否存在
-    if (!getCookie('dismissPrompt')) {
-      setIsModalOpen(true);
-    }
-  }, []);
+function buildUnityHubUri(version: string, fileId: string): string {
+  return `unityhub://${version}/${fileId}`;
+}
 
-  const getCookie = (name: string) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    return parts.length === 2
-      ? parts.pop()?.split(';').shift()
-      : null;
+function groupReleasesByStreamAndYear(results: any[]): Record<string, Record<string, string[]>> {
+  const grouped: Record<string, Record<string, string[]>> = {};
+
+  const streamMapping: Record<string, string> = {
+    "SUPPORTED": "TECH",
   };
 
-  const setCookie = (name: string, value: string, days: number) => {
-    const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = `${name}=${value}; expires=${expires}; path=/`;
-  };
+  for (const release of results) {
+    const version: string = release.version;
+    const rawStream: string = release.stream;
+    const stream = streamMapping[rawStream] || rawStream;
+    const versionNum = version.split('.')[0];
+    const year = versionNum;
 
-  const handleClose = () => setIsModalOpen(false);
-  const handleExit = () => {
-    window.location.replace("https://www.unity.com/");
+    const winDownload = release.downloads?.find((d: any) => d.platform === 'WINDOWS' && d.architecture === 'X86_64');
+    const macDownload = release.downloads?.find((d: any) => d.platform === 'MAC_OS' && d.architecture === 'X86_64');
+    const linuxDownload = release.downloads?.find((d: any) => d.platform === 'LINUX' && d.architecture === 'X86_64');
+
+    const fileId = extractFileId(winDownload?.url || macDownload?.url || linuxDownload?.url || '');
+    if (!fileId) continue;
+
+    if (!grouped[stream]) grouped[stream] = {};
+    if (!grouped[stream][year]) grouped[stream][year] = [];
+    grouped[stream][year].push(buildUnityHubUri(version, fileId));
   }
-  const handleTrue = () => {
-    setCookie('dismissPrompt', 'true', 365);
-    handleClose();
-  };
+
+  for (const stream of Object.keys(grouped)) {
+    for (const year of Object.keys(grouped[stream])) {
+      grouped[stream][year].sort((a, b) => {
+        const aVer = a.split('/')[2].split('.')[1];
+        const bVer = b.split('/')[2].split('.')[1];
+        return bVer.localeCompare(aVer);
+      });
+    }
+  }
+
+  return grouped;
+}
+
+export default function Page() {
 
   const [versionsData, setVersionsData] = useState<Record<string, VersionDictionary>>({});
   const [showAllVersions, setShowAllVersions] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState("all");
-  const [versionType, setVersionType] = useState("LTS");
+  const [versionType, setVersionType] = useState("TECH");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Array<{type: string, url: string}>>([]);
@@ -56,27 +71,42 @@ export default function Page() {
     const fetchAllVersions = async () => {
       setIsLoading(true);
       try {
-        const types = ["LTS", "TECH", "BETA", "ALPHA"];
-        const allData: Record<string, VersionDictionary> = {};
-        
-        for (const type of types) {
-          try {
-            const response = await fetch(`./version/${type}.json`);
-            if (response.ok) {
-              const contentType = response.headers.get('content-type');
-              if (contentType?.includes('application/json')) {
-                allData[type] = await response.json();
-              }
+        const streams = ["TECH", "LTS", "BETA", "ALPHA", "SUPPORTED"];
+        const fetches = streams.map(stream =>
+          fetch(`/api/releases?limit=25&stream=${stream}`)
+            .then(r => r.json())
+            .then(d => ({ stream, results: d.results || [] }))
+            .catch(() => ({ stream, results: [] }))
+        );
+        const allResults = await Promise.all(fetches);
+        const allData: Record<string, Record<string, string[]>> = {};
+
+        for (const { stream, results } of allResults) {
+          const grouped = groupReleasesByStreamAndYear(results);
+          for (const s of Object.keys(grouped)) {
+            const targetStream = s === "SUPPORTED" ? "TECH" : s;
+            if (!allData[targetStream]) allData[targetStream] = {};
+            for (const year of Object.keys(grouped[s])) {
+              if (!allData[targetStream][year]) allData[targetStream][year] = [];
+              allData[targetStream][year].push(...grouped[s][year]);
             }
-          } catch (error) {
-            console.error(`加载 ${type} 版本失败:`, error);
           }
         }
-        
+
         if (Object.keys(allData).length === 0) {
           allData["LTS"] = { "6000": ["unityhub://6000.0.38f1/82314a941f2d"] };
         }
-        
+
+        for (const stream of Object.keys(allData)) {
+          for (const year of Object.keys(allData[stream])) {
+            allData[stream][year].sort((a, b) => {
+              const aVer = a.split('/')[2].split('.')[1];
+              const bVer = b.split('/')[2].split('.')[1];
+              return bVer.localeCompare(aVer);
+            });
+          }
+        }
+
         setVersionsData(allData);
       } catch (error) {
         console.error('加载版本失败:', error);
@@ -87,7 +117,7 @@ export default function Page() {
         setIsLoading(false);
       }
     };
-    
+
     fetchAllVersions();
   }, []);
 
@@ -97,12 +127,12 @@ export default function Page() {
     if (searchQuery) {
       setIsSearching(true);
       const results: Array<{type: string, url: string}> = [];
-      
-      const typeOrder = ["LTS", "TECH", "BETA", "ALPHA"];
-      
+
+      const typeOrder = ["LTS", "TECH", "BETA", "ALPHA", "SUPPORTED"];
+
       for (const type of typeOrder) {
         const typeVersions = versionsData[type] || {};
-        
+
         for (const year in typeVersions) {
           for (const url of typeVersions[year]) {
             const versionName = getVersionName(url);
@@ -116,20 +146,20 @@ export default function Page() {
       results.sort((a, b) => {
         const aVersion = a.url.split("://")[1].split("/")[0];
         const bVersion = b.url.split("://")[1].split("/")[0];
-        
+
         const aMain = parseInt(aVersion.split(".")[0]);
         const bMain = parseInt(bVersion.split(".")[0]);
         if (aMain !== bMain) return bMain - aMain;
-        
+
         const typeIndexA = typeOrder.indexOf(a.type);
         const typeIndexB = typeOrder.indexOf(b.type);
         if (typeIndexA !== typeIndexB) return typeIndexA - typeIndexB;
-        
+
         const aRev = aVersion.split(".")[1];
         const bRev = bVersion.split(".")[1];
         return bRev.localeCompare(aRev);
       });
-      
+
       setSearchResults(results);
     } else {
       setIsSearching(false);
@@ -165,7 +195,7 @@ export default function Page() {
 
   const filterVersions = (versions: string[]) => {
     if (!searchQuery) return versions;
-    return versions.filter(url => 
+    return versions.filter(url =>
       getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
@@ -205,39 +235,6 @@ export default function Page() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-8 rounded shadow-lg max-w-md text-gray-700">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {`
-在访问之前，我们希望您能了解以下事项：
-
-NoUnityCN是一项大家一起实现的**开源**项目，我们旨在为有中文使用需求的**海外Unity开发者**提供Unity Editor版本检索服务，我们不会保留任何数据。
-
-“Unity”、Unity 徽标及其他 Unity 商标是 Unity Technologies 或其在美国和其他地区的分支机构的商标或注册商标。NoUnityCN不是Unity Technologies (优三缔科技有限公司) 提供的一项服务。
-
-NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索Unity版本的开源项目，仅供学习交流使用。
-
-我们尊重任何内容的版权，我们不会提供任何盗版、破解版相关服务，如果我们的内容侵害到您的权益，请及时联系我们删除。
-
-我们面向的开发者群体是**在华办公的海外开发者或使用中文作为工作语言的海外开发者及需要运程协助工作的开发者**，而**不为大中华区（包含中国大陆及港澳台区域）本土开发者提供服务**，对于后者，我们更推荐使用[团结引擎（点击访问）](https://unity.cn/).
-`}
-              </ReactMarkdown>
-              <div className="flex gap-4 mt-6">
-                <Button className="w-full" size="lg" onClick={handleTrue}>
-                   确认
-                </Button>
-                <Button variant="secondary" className="w-full" size="lg" onClick={handleExit}>
-                   访问官网
-                </Button>
-              </div>
-            </div>
-          </div>
-      )}
-
-      {/*公告组件*/}
-      <Inform filename="main" position="top-right" theme="gray" />
-
       <main className="flex-1">
         {isLoading && (
           <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
@@ -255,17 +252,18 @@ NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索U
 
           <div className="flex justify-center space-x-4 mb-8">
             {[
-              { id: "LTS", name: "长期支持" },
               { id: "TECH", name: "技术支持" },
+              { id: "LTS", name: "长期支持" },
               { id: "BETA", name: "测试版" },
               { id: "ALPHA", name: "预览版" }
             ].map((type) => (
               <Button
                 key={type.id}
                 variant={versionType === type.id ? "default" : "outline"}
+                className="rounded-full px-6 py-2"
                 onClick={() => {
                   setVersionType(type.id);
-                  setSelectedVersion("all"); // 切换版本类型时重置为所有版本
+                  setSelectedVersion("all");
                   if (searchQuery) {
                     setSearchQuery("");
                   }
@@ -285,7 +283,7 @@ NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索U
                   {versionType === "BETA" && "测试版本"}
                   {versionType === "ALPHA" && "预览版本"}
                 </CardTitle>
-                <Badge>{versionType}</Badge>
+                <Badge>{versionType === "TECH" ? "SUPPORTED" : versionType}</Badge>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{getVersionName(getLatestVersion(versionType))}</p>
@@ -298,30 +296,10 @@ NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索U
                     <Box className="w-5 h-5 mr-2"/>
                     添加组件
                   </Button>
-                  {/*<Button variant="secondary" className="w-full" size="lg" href={`./releaseNotes?v=${getLatestVersion(versionType)}`}>*/}
-                  {/*  <Share className="w-5 h-5 mr-2"/>*/}
-                  {/*  查看发行说明*/}
-                  {/*</Button>*/}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xl">团结引擎</CardTitle>
-                <Badge>中国</Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">下载Unity的中国版本</p>
-                <p className="text-gray-600 mb-4">请注意：您可以将您的项目从Unity迁移到团结引擎，但目前不支持从团结引擎迁移到Unity。</p>
-                <div className="space-y-4">
-                  <Button variant="secondary" className="w-full" size="lg" href="https://unity.cn/releases">
-                    <Share className="w-5 h-5 mr-2"/>
-                    前往官网
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           <Card className="mb-12">
@@ -329,9 +307,9 @@ NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索U
               <CardTitle>
                 {isSearching
                   ? `全局搜索结果 "${searchQuery}"`
-                  : `所有${versionType === "LTS" ? "长期支持" : 
-                         versionType === "TECH" ? "技术支持" : 
-                         versionType === "BETA" ? "测试" : 
+                  : `所有${versionType === "LTS" ? "长期支持" :
+                         versionType === "TECH" ? "技术支持" :
+                         versionType === "BETA" ? "测试" :
                          versionType === "ALPHA" ? "预览" : ""}版本`
                 }
               </CardTitle>
@@ -358,7 +336,7 @@ NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索U
                     所有版本
                   </Button>
                   {Object.keys(versions)
-                    .sort((a, b) => parseInt(b) - parseInt(a)) // 对年份进行排序
+                    .sort((a, b) => parseInt(b) - parseInt(a))
                     .map((year) => (
                       <Button
                         key={year}
@@ -403,7 +381,7 @@ NoUnityCN**不是破解、修改、下载工具**，而只是一个方便检索U
                         .sort((a, b) => parseInt(b) - parseInt(a))
                         .flatMap(year => versions[year])
                         .filter(url => !searchQuery || getVersionName(url).toLowerCase().includes(searchQuery.toLowerCase()))
-                        .slice(0, showAllVersions ? undefined : 5) // 控制显示数量
+                        .slice(0, showAllVersions ? undefined : 5)
                         .map(url => renderVersionItem(url))
                       : filterVersions(versions[selectedVersion] || []).map(url => renderVersionItem(url))}
 
