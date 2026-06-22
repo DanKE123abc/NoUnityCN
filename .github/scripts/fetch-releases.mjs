@@ -5,8 +5,41 @@ const UNITY_API_BASE = 'https://services.api.unity.com/unity/editor/release/v1/r
 const MAX_LIMIT = 25;
 const outputFile = process.env.OUTPUT_FILE || 'public/release_data/releases.json';
 
-async function fetchAllReleases() {
-  const allResults = [];
+interface SlimRelease {
+  version: string;
+  stream: string;
+  releaseDate: string;
+  downloads: {
+    url: string;
+    type: string;
+    platform: string;
+    architecture: string;
+    downloadSize: { value: number; unit: string };
+    installedSize: { value: number; unit: string };
+    modules?: any[];
+  }[];
+  releaseNotes?: { url: string; type: string };
+}
+
+function slimRelease(release: any): SlimRelease {
+  return {
+    version: release.version,
+    stream: release.stream,
+    releaseDate: release.releaseDate,
+    releaseNotes: release.releaseNotes,
+    downloads: (release.downloads || []).map((d: any) => ({
+      url: d.url,
+      type: d.type,
+      platform: d.platform,
+      architecture: d.architecture,
+      downloadSize: d.downloadSize,
+      installedSize: d.installedSize,
+    })),
+  };
+}
+
+async function fetchAllReleases(): Promise<SlimRelease[]> {
+  const allResults: SlimRelease[] = [];
   let offset = 0;
   let total = Infinity;
 
@@ -25,7 +58,7 @@ async function fetchAllReleases() {
     const data = await res.json();
     total = data.total || 0;
     const results = data.results || [];
-    allResults.push(...results);
+    allResults.push(...results.map(slimRelease));
 
     console.log(`  Fetched ${allResults.length}/${total} releases`);
 
@@ -33,17 +66,19 @@ async function fetchAllReleases() {
     offset += MAX_LIMIT;
   }
 
-  return { total: allResults.length, results: allResults };
+  return allResults;
 }
 
 async function main() {
   try {
-    const data = await fetchAllReleases();
+    const results = await fetchAllReleases();
+    const data = { total: results.length, results };
 
     mkdirSync(dirname(outputFile), { recursive: true });
-    writeFileSync(outputFile, JSON.stringify(data, null, 2));
+    writeFileSync(outputFile, JSON.stringify(data));
 
-    console.log(`Done. Saved ${data.results.length} releases to ${outputFile}`);
+    const sizeMB = (Buffer.byteLength(JSON.stringify(data)) / 1024 / 1024).toFixed(2);
+    console.log(`Done. Saved ${results.length} releases (${sizeMB} MB) to ${outputFile}`);
   } catch (err) {
     console.error('Failed to fetch releases:', err);
     process.exit(1);
