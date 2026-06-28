@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nounitycn-new",
+  "compatibility_date": "2026-06-28",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "./worker/index.ts",
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "VINEXT_KV_CACHE",
+      "id": "04769a7b99e34337abea27d25f8c5d64"
+    }
+  ]
+}
