@@ -1,6 +1,8 @@
 # NoUnityCN
 
 #### 官方网址：[nounitycn.top](https://nounitycn.top/)
+##### 备用网址1：[nounitycn-vinext.danke666.top](https://nounitycn-vinext.danke666.top/)
+##### 备用网址2：[nounitycn.danke666.top](https://nounitycn.danke666.top/)
 
 
 NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版本检索服务，使用官方公开接口开发，我们不会保留任何数据。
