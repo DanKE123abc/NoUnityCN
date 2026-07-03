@@ -1,28 +1,9 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { micromark } from 'micromark';
-import { headers } from 'next/headers';
-
-interface UnityReleaseData {
-    results: {
-        releaseNotes: { type: string; url: string; };
-    }[];
-}
-
-async function fetchReleaseNotes(version: string): Promise<UnityReleaseData> {
-    const h = await headers();
-    const host = h.get('host') || 'localhost:3000';
-    const protocol = h.get('x-forwarded-proto') || 'http';
-    const url = `${protocol}://${host}/api/releases?version=${encodeURIComponent(version)}`;
-    const res = await fetch(url, { next: { revalidate: 3600 } });
-    if (!res.ok) throw new Error(`API 请求失败: ${res.status}`);
-    return await res.json() as UnityReleaseData;
-}
-
-async function fetchMarkdownContent(url: string): Promise<string | null> {
-    try {
-        const res = await fetch(url, { headers: { 'User-Agent': 'Next.js' } });
-        return res.ok ? await res.text() : null;
-    } catch { return null; }
-}
+import { fetchUnityReleases } from '@/lib/unity-api';
 
 function parseUnityHubUri(uri: string) {
     const pattern = /^unityhub:\/\/([^\/]+)\/(.+)$/;
@@ -30,38 +11,68 @@ function parseUnityHubUri(uri: string) {
     return matches ? { version: matches[1] } : null;
 }
 
-type Props = { searchParams: Promise<{ v?: string | string[] }>; };
+export default function ReleaseNotesPage() {
+    const searchParams = useSearchParams();
+    const v = searchParams.get('v');
 
-export default async function ReleaseNotesPage({ searchParams }: Props) {
-    const { v } = await searchParams;
-    const versionParam = Array.isArray(v) ? v[0] : v;
-    const parsed = versionParam ? parseUnityHubUri(versionParam) : null;
+    const [htmlContent, setHtmlContent] = useState<string | null>(null);
+    const [fallbackUrl, setFallbackUrl] = useState<string | undefined>(undefined);
+    const [loading, setLoading] = useState(true);
 
-    let htmlContent: string | null = null;
-    let fallbackUrl: string | undefined = undefined;
+    useEffect(() => {
+        const parsed = v ? parseUnityHubUri(v) : null;
 
-    if (parsed?.version) {
-        try {
-            const data = await fetchReleaseNotes(parsed.version);
-            if (data.results?.length > 0) {
-                const { type, url } = data.results[0].releaseNotes;
-                fallbackUrl = url;
-                if (type === 'MD') {
-                    const mdText = await fetchMarkdownContent(url);
-                    if (mdText) htmlContent = micromark(mdText);
+        if (!parsed?.version) {
+            setLoading(false);
+            return;
+        }
+
+        const fetchReleaseNotes = async () => {
+            try {
+                const data = await fetchUnityReleases({ version: parsed.version });
+
+                if (data.results?.length > 0) {
+                    const { type, url } = data.results[0].releaseNotes;
+                    setFallbackUrl(url);
+
+                    if (type === 'MD') {
+                        const mdRes = await fetch(url, {
+                            headers: { 'User-Agent': 'Next.js' },
+                        });
+
+                        if (mdRes.ok) {
+                            const mdText = await mdRes.text();
+                            setHtmlContent(micromark(mdText));
+                        }
+                    }
                 }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
             }
-        } catch (e) { console.error(e); }
+        };
+
+        fetchReleaseNotes();
+    }, [v]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center p-12">
+                <div className="text-gray-500">加载中...</div>
+            </div>
+        );
     }
 
-    // 成功渲染 Markdown
+    const parsed = v ? parseUnityHubUri(v) : null;
+
     if (htmlContent) {
         return (
             <div className="flex items-center justify-center px-4 py-10">
                 <div className="w-full max-w-5xl bg-white shadow-xl rounded-3xl p-8 md:p-16 space-y-8">
                     <div className="text-center space-y-4">
                         <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">
-                            {parsed?.version ? `Release Notes - ${parsed.version}` : 'Release Notes'}
+                            Release Notes - {parsed?.version || ''}
                         </h1>
                         <div className="w-24 h-1.5 bg-indigo-600 mx-auto rounded-full" />
                     </div>
@@ -77,7 +88,6 @@ export default async function ReleaseNotesPage({ searchParams }: Props) {
         );
     }
 
-    // 无法渲染但有原始链接 (fallback)
     if (fallbackUrl) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
@@ -92,7 +102,6 @@ export default async function ReleaseNotesPage({ searchParams }: Props) {
         );
     }
 
-    // 400 Bad Request
     return (
         <div className="flex flex-col items-center justify-center text-center p-10 h-[60vh]">
             <span className="text-8xl mb-6">🏜️</span>
