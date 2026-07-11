@@ -108,19 +108,13 @@ jobs:
           else
             echo "Extracting version from $exe_file..."
 
-            # Method 1: Read PE version info via 7z list
-            VERSION=$(7z l -slt "$exe_file" 2>/dev/null | grep -oP 'ProductVersion=\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            # Method 1: Read PE version info via 7z list (format: "ProductVersion: 3.19.5")
+            VERSION=$(7z l "$exe_file" 2>/dev/null | grep -oP 'ProductVersion:\s+\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 
-            # Method 2: Fallback - use strings to find version pattern
+            # Method 2: Fallback - search all extracted text for version
             if [ -z "$VERSION" ]; then
-              echo "Fallback: using strings to find version..."
-              VERSION=$(strings "$exe_file" | grep -oP 'ProductVersion:\s*\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-            fi
-
-            # Method 3: Search for Unity Hub version string
-            if [ -z "$VERSION" ]; then
-              echo "Fallback 2: searching for Unity Hub version string..."
-              VERSION=$(strings "$exe_file" | grep -iP 'Unity Hub\s+[0-9]+\.[0-9]+\.[0-9]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+              echo "Fallback: searching for version string..."
+              VERSION=$(7z l "$exe_file" 2>/dev/null | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
             fi
 
             if [ -z "$VERSION" ]; then
