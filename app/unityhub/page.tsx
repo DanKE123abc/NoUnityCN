@@ -83,14 +83,14 @@ export default function UnityHubPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                href="https://pd.zwc365.com/cfdownload/https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg"
+                href="https://github.com/DanKE123abc/NoUnityCN/releases/latest/download/UnityHubSetup-arm64.dmg"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors border border-white/10"
               >
                 <Download className="w-4 h-4" />
                 Apple Silicon
               </a>
               <a
-                href="https://pd.zwc365.com/cfdownload/https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.deb"
+                href="https://github.com/DanKE123abc/NoUnityCN/releases/latest/download/UnityHubSetup-x64.dmg"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors border border-white/10"
               >
                 <Download className="w-4 h-4" />
@@ -108,14 +108,14 @@ export default function UnityHubPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                href="https://pd.zwc365.com/cfdownload/https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-amd64.deb"
+                href="https://github.com/DanKE123abc/NoUnityCN/releases/latest/download/UnityHubSetup-amd64.deb"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors border border-white/10"
               >
                 <Download className="w-4 h-4" />
                 .deb
               </a>
               <a
-                href="https://pd.zwc365.com/cfdownload/https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x86_64.rpm"
+                href="https://github.com/DanKE123abc/NoUnityCN/releases/latest/download/UnityHubSetup-x86_64.rpm"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors border border-white/10"
               >
                 <Download className="w-4 h-4" />
@@ -135,14 +135,14 @@ export default function UnityHubPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                href="https://pd.zwc365.com/cfdownload/https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe"
+                href="https://github.com/DanKE123abc/NoUnityCN/releases/latest/download/UnityHubSetup-x64.exe"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors border border-white/10"
               >
                 <Download className="w-4 h-4" />
                 x64
               </a>
               <a
-                href="https://pd.zwc365.com/cfdownload/https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.exe"
+                href="https://github.com/DanKE123abc/NoUnityCN/releases/latest/download/UnityHubSetup-arm64.exe"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors border border-white/10"
               >
                 <Download className="w-4 h-4" />
