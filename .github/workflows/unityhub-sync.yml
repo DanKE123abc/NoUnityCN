@@ -24,7 +24,7 @@ jobs:
           mkdir -p dist
           urls=(
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg"
-            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.deb"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.dmg"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-amd64.deb"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x86_64.rpm"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe"
@@ -100,20 +100,18 @@ jobs:
           else
             echo "Extracting version from $exe_file..."
 
-            # Method 1: Try extracting version from PE resource using 7z l
-            VERSION=$(7z l -slt "$exe_file" 2>/dev/null | grep -oP 'v=\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            # Extract exe to get [NSIS].nsi
+            TMPDIR=$(mktemp -d)
+            7z x -o"$TMPDIR" "$exe_file" -y > /dev/null 2>&1
 
-            # Method 2: Fallback - search for version string pattern in binary
-            if [ -z "$VERSION" ]; then
-              echo "Fallback: searching binary for version pattern..."
-              VERSION=$(strings "$exe_file" | grep -oP '\b[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\b' | head -1)
+            # Find and parse [NSIS].nsi for BrandingText
+            NSI_FILE=$(find "$TMPDIR" -name '[NSIS].nsi' -o -name '*.nsi' 2>/dev/null | head -1)
+            if [ -n "$NSI_FILE" ] && [ -f "$NSI_FILE" ]; then
+              echo "Found NSI file: $NSI_FILE"
+              VERSION=$(grep -oP 'BrandingText\s+"Unity Hub\s+\K[0-9]+\.[0-9]+\.[0-9]+' "$NSI_FILE" | head -1)
             fi
 
-            # Method 3: Use file info string
-            if [ -z "$VERSION" ]; then
-              echo "Fallback 2: searching for Unity Hub version..."
-              VERSION=$(strings "$exe_file" | grep -iP 'unity\s*hub\s*[0-9]+\.[0-9]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-            fi
+            rm -rf "$TMPDIR"
 
             if [ -z "$VERSION" ]; then
               echo "Warning: Could not extract version, using date suffix"
