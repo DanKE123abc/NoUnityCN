@@ -19,6 +19,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y p7zip-full
 
       - name: Download installers
+        id: download
         run: |
           mkdir -p dist
           urls=(
@@ -29,16 +30,36 @@ jobs:
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.exe"
           )
+          FAILED=0
+          SUCCESS=0
           for url in "${urls[@]}"; do
             filename=$(basename "$url")
             echo "Downloading $filename ..."
-            curl -fSL -o "dist/$filename" "$url"
+            if curl -fSL -o "dist/$filename" "$url" 2>/dev/null; then
+              echo "  OK"
+              SUCCESS=$((SUCCESS + 1))
+            else
+              echo "  FAILED (skipped)"
+              rm -f "dist/$filename"
+              FAILED=$((FAILED + 1))
+            fi
           done
-          echo "### Downloaded files:" >> "$GITHUB_STEP_SUMMARY"
-          ls -lh dist/ >> "$GITHUB_STEP_SUMMARY"
+          echo ""
+          echo "Result: $SUCCESS succeeded, $FAILED failed"
+          echo "### Download summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Succeeded: $SUCCESS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Failed: $FAILED" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh dist/ >> "$GITHUB_STEP_SUMMARY" || true
+          if [ "$SUCCESS" -eq 0 ]; then
+            echo "### No files downloaded, aborting"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Compute MD5 checksums
         id: md5
+        if: steps.download.outputs.skip != 'true'
         run: |
           echo "Computing MD5 checksums..."
           md5sum dist/* > dist/checksums.md5
@@ -64,28 +85,40 @@ jobs:
         id: version
         if: steps.md5.outputs.changed == 'true'
         run: |
-          # Use 7z to extract PE version info from the exe
-          exe_file="dist/UnityHubSetup-x64.exe"
+          # Find any available exe to extract version
+          exe_file=""
+          for f in dist/UnityHubSetup-x64.exe dist/UnityHubSetup-arm64.exe; do
+            if [ -f "$f" ]; then
+              exe_file="$f"
+              break
+            fi
+          done
 
-          # Method 1: Try extracting version from PE resource using 7z l
-          echo "Extracting version from $exe_file..."
-          VERSION=$(7z l -slt "$exe_file" 2>/dev/null | grep -oP 'v=\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-
-          # Method 2: Fallback - search for version string pattern in binary
-          if [ -z "$VERSION" ]; then
-            echo "Fallback: searching binary for version pattern..."
-            VERSION=$(strings "$exe_file" | grep -oP '\b[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\b' | head -1)
-          fi
-
-          # Method 3: Use file info string
-          if [ -z "$VERSION" ]; then
-            echo "Fallback 2: searching for Unity Hub version..."
-            VERSION=$(strings "$exe_file" | grep -iP 'unity\s*hub\s*[0-9]+\.[0-9]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-          fi
-
-          if [ -z "$VERSION" ]; then
-            echo "Warning: Could not extract version, using date suffix"
+          if [ -z "$exe_file" ]; then
+            echo "No exe file available, using date-based tag"
             VERSION="0.0.0.$(date -u +%Y%m%d)"
+          else
+            echo "Extracting version from $exe_file..."
+
+            # Method 1: Try extracting version from PE resource using 7z l
+            VERSION=$(7z l -slt "$exe_file" 2>/dev/null | grep -oP 'v=\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+            # Method 2: Fallback - search for version string pattern in binary
+            if [ -z "$VERSION" ]; then
+              echo "Fallback: searching binary for version pattern..."
+              VERSION=$(strings "$exe_file" | grep -oP '\b[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\b' | head -1)
+            fi
+
+            # Method 3: Use file info string
+            if [ -z "$VERSION" ]; then
+              echo "Fallback 2: searching for Unity Hub version..."
+              VERSION=$(strings "$exe_file" | grep -iP 'unity\s*hub\s*[0-9]+\.[0-9]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            fi
+
+            if [ -z "$VERSION" ]; then
+              echo "Warning: Could not extract version, using date suffix"
+              VERSION="0.0.0.$(date -u +%Y%m%d)"
+            fi
           fi
 
           TAG="v${VERSION}"
@@ -120,15 +153,19 @@ jobs:
         if: steps.md5.outputs.changed == 'true'
         run: |
           TAG="${{ steps.version.outputs.tag }}"
+          # Collect only files that exist
+          FILES=$(find dist -maxdepth 1 -type f ! -name 'checksums.md5' -printf '%f\n' | sort)
+          if [ -z "$FILES" ]; then
+            echo "No files to upload"
+            exit 1
+          fi
+          echo "Uploading:"
+          echo "$FILES"
+          # Pass files as arguments
           gh release create "$TAG" \
             --title "Unity Hub $TAG" \
             --notes "Unity Hub $TAG - Auto-synced on $(date -u +%Y-%m-%d %H:%M UTC)" \
-            dist/UnityHubSetup-arm64.dmg \
-            dist/UnityHubSetup-x64.deb \
-            dist/UnityHubSetup-amd64.deb \
-            dist/UnityHubSetup-x86_64.rpm \
-            dist/UnityHubSetup-x64.exe \
-            dist/UnityHubSetup-arm64.exe
+            $(echo "$FILES" | sed 's/^/dist\//')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
