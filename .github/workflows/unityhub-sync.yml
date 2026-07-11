@@ -1,0 +1,148 @@
+name: Sync Unity Hub Installers
+
+on:
+  schedule:
+    - cron: '23 16 * * *'  # UTC 16:23 daily (00:23 Beijing time)
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install 7z
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full
+
+      - name: Download installers
+        run: |
+          mkdir -p dist
+          urls=(
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.deb"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-amd64.deb"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x86_64.rpm"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.exe"
+          )
+          for url in "${urls[@]}"; do
+            filename=$(basename "$url")
+            echo "Downloading $filename ..."
+            curl -fSL -o "dist/$filename" "$url"
+          done
+          echo "### Downloaded files:" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh dist/ >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Compute MD5 checksums
+        id: md5
+        run: |
+          echo "Computing MD5 checksums..."
+          md5sum dist/* > dist/checksums.md5
+          cat dist/checksums.md5
+
+          # Compare with stored hashes
+          CHANGED="false"
+          if [ -f hashes.md5 ]; then
+            if ! diff -q <(sort hashes.md5) <(sort dist/checksums.md5) > /dev/null 2>&1; then
+              CHANGED="true"
+              echo "### Hash mismatch detected" >> "$GITHUB_STEP_SUMMARY"
+              diff <(sort hashes.md5) <(sort dist/checksums.md5) >> "$GITHUB_STEP_SUMMARY" || true
+            else
+              echo "### All checksums match - no update needed" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            CHANGED="true"
+            echo "### No previous hashes found - first run" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+
+      - name: Extract version from exe
+        id: version
+        if: steps.md5.outputs.changed == 'true'
+        run: |
+          # Use 7z to extract PE version info from the exe
+          exe_file="dist/UnityHubSetup-x64.exe"
+
+          # Method 1: Try extracting version from PE resource using 7z l
+          echo "Extracting version from $exe_file..."
+          VERSION=$(7z l -slt "$exe_file" 2>/dev/null | grep -oP 'v=\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+          # Method 2: Fallback - search for version string pattern in binary
+          if [ -z "$VERSION" ]; then
+            echo "Fallback: searching binary for version pattern..."
+            VERSION=$(strings "$exe_file" | grep -oP '\b[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\b' | head -1)
+          fi
+
+          # Method 3: Use file info string
+          if [ -z "$VERSION" ]; then
+            echo "Fallback 2: searching for Unity Hub version..."
+            VERSION=$(strings "$exe_file" | grep -iP 'unity\s*hub\s*[0-9]+\.[0-9]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          fi
+
+          if [ -z "$VERSION" ]; then
+            echo "Warning: Could not extract version, using date suffix"
+            VERSION="0.0.0.$(date -u +%Y%m%d)"
+          fi
+
+          TAG="v${VERSION}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "### Extracted version: $TAG" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check existing release
+        id: check
+        if: steps.md5.outputs.changed == 'true'
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          EXISTS=$(gh release view "$TAG" --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          if [ -n "$EXISTS" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "### Release $TAG already exists, will update" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "### Release $TAG is new" >> "$GITHUB_STEP_SUMMARY"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete existing release
+        if: steps.md5.outputs.changed == 'true' && steps.check.outputs.exists == 'true'
+        run: |
+          gh release delete "${{ steps.version.outputs.tag }}" --yes --cleanup-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release and upload assets
+        if: steps.md5.outputs.changed == 'true'
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          gh release create "$TAG" \
+            --title "Unity Hub $TAG" \
+            --notes "Unity Hub $TAG - Auto-synced on $(date -u +%Y-%m-%d %H:%M UTC)" \
+            dist/UnityHubSetup-arm64.dmg \
+            dist/UnityHubSetup-x64.deb \
+            dist/UnityHubSetup-amd64.deb \
+            dist/UnityHubSetup-x86_64.rpm \
+            dist/UnityHubSetup-x64.exe \
+            dist/UnityHubSetup-arm64.exe
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update stored hashes
+        if: steps.md5.outputs.changed == 'true'
+        run: |
+          cp dist/checksums.md5 hashes.md5
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B main
+          git add hashes.md5
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update checksums for ${{ steps.version.outputs.tag }}"
+            git push origin main
+          else
+            echo "No hash changes to commit"
+          fi
