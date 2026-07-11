@@ -12,9 +12,6 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Install 7z
         run: sudo apt-get update && sudo apt-get install -y p7zip-full
 
@@ -24,7 +21,7 @@ jobs:
           mkdir -p dist
           urls=(
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg"
-            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.dmg"
+            "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.deb"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-amd64.deb"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x86_64.rpm"
             "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe"
@@ -57,7 +54,7 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Compute MD5 checksums
+      - name: Compute MD5 and compare with previous release
         id: md5
         if: steps.download.outputs.skip != 'true'
         run: |
@@ -65,19 +62,28 @@ jobs:
           md5sum dist/* > dist/checksums.md5
           cat dist/checksums.md5
 
-          # Compare with stored hashes
+          # Find previous release's hashes.md5
           CHANGED="false"
-          if [ -f hashes.md5 ]; then
-            if ! diff -q <(sort hashes.md5) <(sort dist/checksums.md5) > /dev/null 2>&1; then
-              CHANGED="true"
-              echo "### Hash mismatch detected" >> "$GITHUB_STEP_SUMMARY"
-              diff <(sort hashes.md5) <(sort dist/checksums.md5) >> "$GITHUB_STEP_SUMMARY" || true
+          PREV_TAG=$(gh release list --limit 10 --json tagName,publishedAt \
+            --jq 'sort_by(.publishedAt) | reverse | .[0].tagName' 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "Previous release: $PREV_TAG"
+            if gh release download "$PREV_TAG" -p "hashes.md5" -D /tmp/prev_hashes 2>/dev/null; then
+              if ! diff -q <(sort /tmp/prev_hashes/hashes.md5) <(sort dist/checksums.md5) > /dev/null 2>&1; then
+                CHANGED="true"
+                echo "### Hash mismatch detected (vs $PREV_TAG)" >> "$GITHUB_STEP_SUMMARY"
+                diff <(sort /tmp/prev_hashes/hashes.md5) <(sort dist/checksums.md5) >> "$GITHUB_STEP_SUMMARY" || true
+              else
+                echo "### All checksums match $PREV_TAG - no update needed" >> "$GITHUB_STEP_SUMMARY"
+              fi
             else
-              echo "### All checksums match - no update needed" >> "$GITHUB_STEP_SUMMARY"
+              CHANGED="true"
+              echo "### No hashes.md5 in $PREV_TAG - first run with hashes" >> "$GITHUB_STEP_SUMMARY"
             fi
           else
             CHANGED="true"
-            echo "### No previous hashes found - first run" >> "$GITHUB_STEP_SUMMARY"
+            echo "### No previous releases found" >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
 
@@ -159,25 +165,11 @@ jobs:
           fi
           echo "Uploading:"
           echo "$FILES"
-          # Pass files as arguments
+          # Create release with hashes.md5 included
           gh release create "$TAG" \
             --title "Unity Hub $TAG" \
             --notes "Unity Hub $TAG - Auto-synced on $(date -u +%Y-%m-%d %H:%M UTC)" \
+            dist/checksums.md5 \
             $(echo "$FILES" | sed 's/^/dist\//')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update stored hashes
-        if: steps.md5.outputs.changed == 'true'
-        run: |
-          cp dist/checksums.md5 hashes.md5
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B main
-          git add hashes.md5
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: update checksums for ${{ steps.version.outputs.tag }}"
-            git push origin main
-          else
-            echo "No hash changes to commit"
-          fi
