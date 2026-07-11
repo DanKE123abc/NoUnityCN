@@ -102,26 +102,34 @@ jobs:
 
           if [ -z "$exe_file" ]; then
             echo "No exe file available, using date-based tag"
-            VERSION="0.0.0.$(date -u +%Y%m%d)"
+            VERSION="$(date -u +%Y.%m.%d)"
           else
             echo "Extracting version from $exe_file..."
 
             # Extract exe to get [NSIS].nsi
             TMPDIR=$(mktemp -d)
             7z x -o"$TMPDIR" "$exe_file" -y > /dev/null 2>&1
+            echo "Extracted files:"
+            find "$TMPDIR" -type f | head -20
 
             # Find and parse [NSIS].nsi for BrandingText
-            NSI_FILE=$(find "$TMPDIR" -name '[NSIS].nsi' -o -name '*.nsi' 2>/dev/null | head -1)
+            NSI_FILE=$(find "$TMPDIR" -name '*.nsi' 2>/dev/null | head -1)
             if [ -n "$NSI_FILE" ] && [ -f "$NSI_FILE" ]; then
               echo "Found NSI file: $NSI_FILE"
+              echo "NSI content (first 30 lines):"
+              head -30 "$NSI_FILE"
               VERSION=$(grep -oP 'BrandingText\s+"Unity Hub\s+\K[0-9]+\.[0-9]+\.[0-9]+' "$NSI_FILE" | head -1)
+            else
+              echo "No NSI file found, trying fallback methods..."
+              # Fallback: search for version in any extracted file
+              VERSION=$(grep -r -oP 'Unity Hub\s+\K[0-9]+\.[0-9]+\.[0-9]+' "$TMPDIR" 2>/dev/null | head -1)
             fi
 
             rm -rf "$TMPDIR"
 
             if [ -z "$VERSION" ]; then
               echo "Warning: Could not extract version, using date suffix"
-              VERSION="0.0.0.$(date -u +%Y%m%d)"
+              VERSION="$(date -u +%Y.%m.%d)"
             fi
           fi
 
@@ -166,9 +174,11 @@ jobs:
           echo "Uploading:"
           echo "$FILES"
           # Create release with hashes.md5 included
+          # Use commit SHA as target to avoid git repository requirement
           gh release create "$TAG" \
             --title "Unity Hub $TAG" \
-            --notes "Unity Hub $TAG - Auto-synced on $(date -u +%Y-%m-%d %H:%M UTC)" \
+            --notes "Unity Hub $TAG - Auto-synced on $(date -u '+%Y-%m-%d %H:%M UTC')" \
+            --target "${{ github.sha }}" \
             dist/checksums.md5 \
             $(echo "$FILES" | sed 's/^/dist\//')
         env:
