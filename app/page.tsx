@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import HeroSection from "@/components/hero-section";
+import { fetchUnityReleases } from "@/lib/unity-api";
 
 interface VersionInfo {
   url: string;
@@ -90,9 +91,7 @@ export default function Page() {
 
   const fetchStreamPage = async (stream: string, limit: number, offset: number): Promise<{results: any[], total: number}> => {
     try {
-      const res = await fetch(`/api/releases?limit=${limit}&offset=${offset}&stream=${stream}`);
-      if (!res.ok) return { results: [], total: 0 };
-      const data = await res.json();
+      const data = await fetchUnityReleases({ stream, limit, offset });
       return { results: data.results || [], total: data.total || 0 };
     } catch {
       return { results: [], total: 0 };

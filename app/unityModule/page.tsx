@@ -6,6 +6,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { fetchUnityReleases } from '@/lib/unity-api';
 // --- 枚举类型定义 ---
 
 enum UnityReleaseDownloadArchitecture {
@@ -273,22 +274,14 @@ const UnityModuleFetcherInner: React.FC = () => {
         setError(null);
         setModules(null);
 
-        const params = new URLSearchParams({ version: parsedVersion });
-        if (selectedPlatform) params.set('platform', selectedPlatform);
-        if (selectedArchitecture) params.set('architecture', selectedArchitecture);
-        if (selectedStream) params.set('stream', selectedStream);
-        if (selectedEntitlements.length > 0) {
-            selectedEntitlements.forEach(e => params.append('entitlement', e));
-        }
-
         try {
-            const response = await fetch(`/api/releases?${params.toString()}`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await fetchUnityReleases({
+                version: parsedVersion,
+                platform: selectedPlatform,
+                architecture: selectedArchitecture,
+                stream: selectedStream || undefined,
+                entitlement: selectedEntitlements.length > 0 ? selectedEntitlements : undefined,
+            });
 
             const release = data.results?.[0];
             if (!release) {
