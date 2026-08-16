@@ -58,27 +58,27 @@ export default function DownloadPage({searchParams,}: {
     }
 
     function parseLinkwin(key: string) {
-        return `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/Windows64EditorInstaller/UnitySetup64-${parseUnityHubUri(key)?.version}.exe`;
+        return `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/Windows64EditorInstaller/UnitySetup64-${parseUnityHubUri(key)?.version}.exe`;
     }
 
     function parseLinkwin32(key: string) {
-        return `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/Windows32EditorInstaller/UnitySetup32-${parseUnityHubUri(key)?.version}.exe`;
+        return `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/Windows32EditorInstaller/UnitySetup32-${parseUnityHubUri(key)?.version}.exe`;
     }
 
     function parseLinkwinarm(key: string) {
-        return `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/WindowsArm64EditorInstaller/UnitySetupArm64-${parseUnityHubUri(key)?.version}.exe`;
+        return `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/WindowsArm64EditorInstaller/UnitySetupArm64-${parseUnityHubUri(key)?.version}.exe`;
     }
 
     function parseLinkmac(key: string) {
-        return `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/MacEditorInstaller/Unity-${parseUnityHubUri(key)?.version}.pkg`;
+        return `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/MacEditorInstaller/Unity-${parseUnityHubUri(key)?.version}.pkg`;
     }
 
     function parseLinkmacarm(key: string) {
-        return `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/MacEditorInstallerArm64/Unity-${parseUnityHubUri(key)?.version}.pkg`;
+        return `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/MacEditorInstallerArm64/Unity-${parseUnityHubUri(key)?.version}.pkg`;
     }
 
     function parseLinklinux(key: string) {
-        return `https://pd.zwc365.com/https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/LinuxEditortInstaller/Unity-${parseUnityHubUri(key)?.version}.tar.xz`;
+        return `https://download.unity3d.com/download_unity/${parseUnityHubUri(key)?.fileId}/LinuxEditortInstaller/Unity-${parseUnityHubUri(key)?.version}.tar.xz`;
     }
 
     // 检查当前版本是否支持特定平台
