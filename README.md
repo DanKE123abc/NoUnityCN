@@ -26,7 +26,15 @@ NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版
 > 
 > 本站不为不在Unity支持地区的用户服务
 
-![stars](https://www.star-history.com/?repos=nounitycn%2Fnounitycn&type=date&legend=top-left)
+### Star History
+
+<a href="https://www.star-history.com/?repos=nounitycn%2Fnounitycn&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=nounitycn/nounitycn&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=nounitycn/nounitycn&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=nounitycn/nounitycn&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ### 版权所有
 
