@@ -26,6 +26,8 @@ NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版
 > 
 > 本站不为不在Unity支持地区的用户服务
 
+![stars](https://www.star-history.com/?repos=nounitycn%2Fnounitycn&type=date&legend=top-left)
+
 ### 版权所有
 
 本软件遵循 MIT License，项目内所有代码遵循协议分发，但不包括通过API(Application Programming Interface)获取的内容及基于本项目开发的衍生内容。
