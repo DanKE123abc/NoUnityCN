@@ -2,9 +2,9 @@ name: Sync Unity Hub Installers
 
 on:
   schedule:
-    - cron: '23 16 * * *'  # UTC 16:23 daily (00:23 Beijing time)
+    - cron: '0 1 * * *'  # UTC 01:00 daily (09:00 Beijing time)
   workflow_dispatch:
-
+ 
 jobs:
   sync:
     runs-on: ubuntu-latest
