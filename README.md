@@ -6,6 +6,8 @@
 
 ##### 备用网址2：[nounitycn.danke666.top](https://nounitycn.danke666.top/)
 
+##### 我们项目的仓库地址仅在[本Github仓库](https://github.com/DanKE123abc/NoUnityCN)开发，其他平台例如[AtomGit](https://gitcode.com/gh_mirrors/no/NoUnityCN)等平台皆为未经通知的镜像，请以[本项目](https://github.com/DanKE123abc/NoUnityCN)的官方仓库及网站提供问题报告。
+
 NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版本检索服务，使用官方公开接口开发，我们不会保留任何数据。
 
 > [!IMPORTANT]
