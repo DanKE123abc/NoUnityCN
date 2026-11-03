@@ -35,3 +35,4 @@ workspace.xml
 
 # wrangler
 .wrangler/
+public/version.json
