@@ -1,9 +1,22 @@
 "use client"
 
+import React from "react"
 import { useI18n } from "@/lib/i18n"
 
 export function SiteFooter() {
   const { t, locale, setLocale } = useI18n()
+  const [buildHash, setBuildHash] = React.useState<string>("")
+
+  React.useEffect(() => {
+    let cancelled = false
+    fetch("/version.json")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.hash) setBuildHash(data.hash)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   const footerNavigation = [
     {
@@ -17,7 +30,6 @@ export function SiteFooter() {
       category: t("footer.resources"),
       items: [
         { name: t("footer.officialDocs"), href: "https://docs.unity3d.com/Manual/index.html" },
-        { name: t("footer.unityModule"), href: "/unityModule" },
       ],
     },
     {
@@ -78,6 +90,9 @@ export function SiteFooter() {
           <p className="text-base text-gray-400 text-left">{t("footer.desc1")}</p>
           <p className="text-base text-gray-400 text-left">{t("footer.desc2")}</p>
           <p className="text-base text-gray-400 text-left">{t("footer.desc3")}</p>
+          {buildHash && (
+            <p className="text-base text-gray-400 text-left">{t("footer.build")}: {buildHash}</p>
+          )}
         </div>
       </div>
     </footer>

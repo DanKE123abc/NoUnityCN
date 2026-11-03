@@ -42,6 +42,7 @@ const dictionaries: Record<Locale, Record<string, string>> = {
     "footer.desc2": "“Unity”、Unity 徽标及其他 Unity 商标是 Unity Technologies 或其在美国和其他地区的分支机构的商标或注册商标。NoUnityCN不是Unity Technologies (优三缔科技有限公司) 软件提供的一项服务，本站徽标版权归Unity Technologies 或其在美国和其他地区的分支机构所有。",
     "footer.desc3": "我们不会保存任何的文件与数据，所有的内容来自官方下载渠道以及公益服务器，请自行甄别。",
     "footer.language": "语言",
+    "footer.build": "构建版本",
     "footer.language.zh": "中文",
     "footer.language.en": "English",
 
@@ -179,6 +180,7 @@ const dictionaries: Record<Locale, Record<string, string>> = {
     "footer.desc2": "\"Unity\", the Unity logo and other Unity trademarks are trademarks or registered trademarks of Unity Technologies or its affiliates in the U.S. and elsewhere. NoUnityCN is not a service provided by Unity Technologies (Unity Software Inc.), and the site logo copyright belongs to Unity Technologies or its affiliates.",
     "footer.desc3": "We do not store any files or data; all content comes from official download channels and public servers. Please verify on your own.",
     "footer.language": "Language",
+    "footer.build": "Build",
     "footer.language.zh": "中文",
     "footer.language.en": "English",
 

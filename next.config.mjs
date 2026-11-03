@@ -1,3 +1,21 @@
+import { execSync } from "child_process"
+import fs from "fs"
+import path from "path"
+
+let buildHash = "dev"
+try {
+  buildHash = execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim()
+} catch (e) {
+  // ignore
+}
+
+try {
+  const versionFile = path.join(process.cwd(), "public", "version.json")
+  fs.writeFileSync(versionFile, JSON.stringify({ hash: buildHash }))
+} catch (e) {
+  // ignore
+}
+
 let userConfig = undefined
 
 /** @type {import('next').NextConfig} */
