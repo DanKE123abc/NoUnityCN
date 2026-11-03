@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/lib/i18n";
 
 const ANDROID_BS = "Android";
 const IOS_BS = "iOS";
@@ -62,6 +63,7 @@ function DownloadButton({ href, children }: { href: string; children: React.Reac
 }
 
 export default function ComponentContent() {
+    const { t } = useI18n();
     const searchParams = useSearchParams();
     const version = searchParams.get('v') || '';
     const parsed = parseUnityHubUri(version);
@@ -75,27 +77,27 @@ export default function ComponentContent() {
                             <Home className="w-6 h-6 text-gray-500 hover:text-gray-700 transition-colors" />
                         </a>
                         <div className="flex items-baseline gap-2">
-                            添加组件：
+                            {t('component.add')}
                             <span className="text-lg text-gray-500">{version}</span>
                         </div>
                     </h1>
 
                     <Card className="mb-6">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-xl">其他内容</CardTitle>
-                            <Badge>其他</Badge>
+                            <CardTitle className="text-xl">{t('component.other')}</CardTitle>
+                            <Badge>{t('component.otherBadge')}</Badge>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-600 mb-4">下载 Unity {parsed?.version} 的 其他内容</p>
+                            <p className="text-gray-600 mb-4">{t('component.otherDesc', { version: parsed?.version || '' })}</p>
                             <div className="space-y-4">
                                 <DownloadButton href={parseLinkDocumentation(version)}>
-                                    离线文档
+                                    {t('component.offlineDocs')}
                                 </DownloadButton>
                                 <DownloadButton href={parseLinkBS(version)}>
-                                    Builtin Shaders (内置着色器)
+                                    {t('component.builtinShaders')}
                                 </DownloadButton>
                                 <DownloadButton href={`./unityModule?v=${version}`}>
-                                    module.json 生成
+                                    {t('component.moduleJson')}
                                 </DownloadButton>
                             </div>
                         </CardContent>
@@ -111,11 +113,11 @@ export default function ComponentContent() {
                         <TabsContent value="windows">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-xl">Windows专区</CardTitle>
-                                    <Badge>WINDOWS</Badge>
+                                    <CardTitle className="text-xl">{t('component.windows')}</CardTitle>
+                                    <Badge>{t('component.windowsBadge')}</Badge>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-gray-600 mb-4">下载适用于Windows平台下Unity {parsed?.version}的组件</p>
+                                    <p className="text-gray-600 mb-4">{t('component.windowsDesc', { version: parsed?.version || '' })}</p>
                                     <div className="space-y-4">
                                         <DownloadButton href={parseLinkwin(ANDROID_BS, version)}>Android Build Support</DownloadButton>
                                         <DownloadButton href={parseLinkwin(IOS_BS, version)}>iOS Build Support</DownloadButton>
@@ -138,11 +140,11 @@ export default function ComponentContent() {
                         <TabsContent value="mac">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-xl">Mac OS专区</CardTitle>
-                                    <Badge>Mac</Badge>
+                                    <CardTitle className="text-xl">{t('component.mac')}</CardTitle>
+                                    <Badge>{t('component.macBadge')}</Badge>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-gray-600 mb-4">下载适用于Mac OS平台下Unity {parsed?.version}的组件</p>
+                                    <p className="text-gray-600 mb-4">{t('component.macDesc', { version: parsed?.version || '' })}</p>
                                     <div className="space-y-4">
                                         <DownloadButton href={parseLinkmac(ANDROID_BS, version)}>Android Build Support</DownloadButton>
                                         <DownloadButton href={parseLinkmac(IOS_BS, version)}>iOS Build Support</DownloadButton>
@@ -164,11 +166,11 @@ export default function ComponentContent() {
                         <TabsContent value="linux">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-xl">Linux专区</CardTitle>
-                                    <Badge>LINUX</Badge>
+                                    <CardTitle className="text-xl">{t('component.linux')}</CardTitle>
+                                    <Badge>{t('component.linuxBadge')}</Badge>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-gray-600 mb-4">下载适用于LINUX平台下Unity {parsed?.version}的组件</p>
+                                    <p className="text-gray-600 mb-4">{t('component.linuxDesc', { version: parsed?.version || '' })}</p>
                                     <div className="space-y-4">
                                         <DownloadButton href={parseLinklinux(ANDROID_BS, version)}>Android Build Support</DownloadButton>
                                         <DownloadButton href={parseLinklinux(IOS_BS, version)}>iOS Build Support</DownloadButton>

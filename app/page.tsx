@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import HeroSection from "@/components/hero-section";
 import { fetchUnityReleases } from "@/lib/unity-api";
+import { useI18n } from "@/lib/i18n";
 
 interface VersionInfo {
   url: string;
@@ -75,6 +76,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function Page() {
+  const { t } = useI18n();
 
   const [versionsData, setVersionsData] = useState<Record<string, VersionDictionary>>({});
   const [showAllVersions, setShowAllVersions] = useState(false);
@@ -316,19 +318,19 @@ export default function Page() {
       <td className="py-3 px-4">
         <Button variant="secondary" size="sm" href={`./releaseNotes?v=${url}`}>
           <Share className="w-4 h-4 mr-1"/>
-          发布说明
+          {t('home.releaseNotesBtn')}
         </Button>
       </td>
       <td className="py-3 px-4">
         <Button size="sm" href={`./download?v=${url}`}>
           <Download className="w-4 h-4 mr-1"/>
-          下载
+          {t('home.downloadBtn')}
         </Button>
       </td>
       <td className="py-3 px-4">
         <Button variant="outline" size="sm" href={`./component?v=${url}`}>
           <Box className="w-4 h-4 mr-1"/>
-          添加组件
+          {t('home.addComponentBtn')}
         </Button>
       </td>
     </tr>
@@ -349,16 +351,16 @@ export default function Page() {
       <main className="flex-1 bg-white scroll-mt-16" id="download-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">下载 Unity</h2>
-            <p className="text-lg text-gray-600">选择适合您的版本开始创作</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">{t('home.title')}</h2>
+            <p className="text-lg text-gray-600">{t('home.subtitle')}</p>
           </div>
 
           <div className="flex justify-center space-x-4 mb-8">
             {[
-              { id: "TECH", name: "技术支持" },
-              { id: "LTS", name: "长期支持" },
-              { id: "BETA", name: "测试版" },
-              { id: "ALPHA", name: "预览版" }
+              { id: "TECH", name: t("home.tab.tech") },
+              { id: "LTS", name: t("home.tab.lts") },
+              { id: "BETA", name: t("home.tab.beta") },
+              { id: "ALPHA", name: t("home.tab.alpha") }
             ].map((type) => (
               <Button
                 key={type.id}
@@ -381,7 +383,7 @@ export default function Page() {
           <div className="relative mb-6 max-w-md mx-auto">
             <Input
               type="text"
-              placeholder="全局搜索版本..."
+              placeholder={t('home.search.placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10"
@@ -393,11 +395,13 @@ export default function Page() {
             <CardHeader>
               <CardTitle>
                 {isSearching
-                  ? `全局搜索结果 "${searchQuery}"`
-                  : `所有${versionType === "LTS" ? "长期支持" :
-                         versionType === "TECH" ? "技术支持" :
-                         versionType === "BETA" ? "测试" :
-                         versionType === "ALPHA" ? "预览" : ""}版本`
+                  ? t('home.card.title.search', { query: searchQuery })
+                  : t('home.card.title.all', { stream: t(
+                      versionType === "LTS" ? "home.stream.lts" :
+                      versionType === "TECH" ? "home.stream.tech" :
+                      versionType === "BETA" ? "home.stream.beta" :
+                      versionType === "ALPHA" ? "home.stream.alpha" : "home.stream.tech"
+                    ) })
                 }
               </CardTitle>
             </CardHeader>
@@ -409,7 +413,7 @@ export default function Page() {
                     variant={selectedVersion === "all" ? "default" : "outline"}
                     onClick={() => setSelectedVersion("all")}
                   >
-                    所有版本
+                    {t('home.version.all')}
                   </Button>
                   {Object.keys(versions)
                     .sort((a, b) => parseInt(b) - parseInt(a))
@@ -419,7 +423,7 @@ export default function Page() {
                         variant={selectedVersion === year ? "default" : "outline"}
                         onClick={() => setSelectedVersion(year)}
                       >
-                        {year} 系列
+                        {t('home.version.series', { year })}
                       </Button>
                     ))}
                 </div>
@@ -429,11 +433,11 @@ export default function Page() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">版本</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">发布时间</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">发布说明</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">下载页面</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">添加组件</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">{t('home.table.version')}</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">{t('home.table.releaseDate')}</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">{t('home.table.releaseNotes')}</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">{t('home.table.downloadPage')}</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">{t('home.table.addComponent')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -444,7 +448,7 @@ export default function Page() {
                           .map(item => renderVersionRow(item.url, item.releaseDate, item.type))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="text-center text-gray-500 py-4">没有找到匹配的版本</td>
+                          <td colSpan={5} className="text-center text-gray-500 py-4">{t('home.noResults')}</td>
                         </tr>
                       )
                     ) : (
@@ -463,14 +467,14 @@ export default function Page() {
               {!isSearching && !showAllVersions && selectedVersion === "all" && Object.keys(versions).flatMap(year => versions[year]).length > 10 && (
                 <div className="mt-4">
                   {!isFullyLoaded ? (
-                    <div className="text-center text-sm text-gray-400 py-2">全量数据加载中...</div>
+                    <div className="text-center text-sm text-gray-400 py-2">{t('home.loadingAll')}</div>
                   ) : (
                     <Button
                       variant="ghost"
                       className="w-full"
                       onClick={() => setShowAllVersions(true)}
                     >
-                      显示更多版本 ({Object.keys(versions).flatMap(year => versions[year]).length} 个) ↓
+                      {t('home.showMore', { count: Object.keys(versions).flatMap(year => versions[year]).length })}
                     </Button>
                   )}
                 </div>
@@ -479,14 +483,14 @@ export default function Page() {
               {!isSearching && !showAllVersions && selectedVersion !== "all" && (versions[selectedVersion] || []).length > 10 && (
                 <div className="mt-4">
                   {!isFullyLoaded ? (
-                    <div className="text-center text-sm text-gray-400 py-2">全量数据加载中...</div>
+                    <div className="text-center text-sm text-gray-400 py-2">{t('home.loadingAll')}</div>
                   ) : (
                     <Button
                       variant="ghost"
                       className="w-full"
                       onClick={() => setShowAllVersions(true)}
                     >
-                      显示更多版本 ({(versions[selectedVersion] || []).length} 个) ↓
+                      {t('home.showMore', { count: (versions[selectedVersion] || []).length })}
                     </Button>
                   )}
                 </div>
@@ -499,7 +503,7 @@ export default function Page() {
                     className="w-full"
                     onClick={() => setShowAllVersions(true)}
                   >
-                    显示更多搜索结果 ({searchResults.length - 10} 个) ↓
+                    {t('home.showMoreSearch', { count: searchResults.length - 10 })}
                   </Button>
                 </div>
               )}

@@ -7,6 +7,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { fetchUnityReleases } from '@/lib/unity-api';
+import { useI18n } from '@/lib/i18n';
 // --- 枚举类型定义 ---
 
 enum UnityReleaseDownloadArchitecture {
@@ -166,6 +167,7 @@ const fetch_modules_from_release = (
 
 // --- React 组件 ---
 const UnityModuleFetcherInner: React.FC = () => {
+    const { t } = useI18n();
     // --- 使用钩子获取 URL 参数和路由控制 ---
     const searchParams = useSearchParams(); // 获取查询参数对象
     const router = useRouter();             // 用于更新浏览器 URL
@@ -201,7 +203,7 @@ const UnityModuleFetcherInner: React.FC = () => {
                 setError(null);
             } else {
                 setParsedVersion(null);
-                setError('无法解析 URI，请检查格式是否正确！');
+                setError(t('unityModule.parseError'));
             }
         }
 
@@ -255,7 +257,7 @@ const UnityModuleFetcherInner: React.FC = () => {
             router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
         } else {
             setParsedVersion(null);
-            setError('无法解析 URI，请检查格式是否正确');
+            setError(t('unityModule.parseError2'));
             // 清除 URL 中的 'v' 参数
             const newParams = new URLSearchParams(searchParams.toString());
             newParams.delete('v');
@@ -266,7 +268,7 @@ const UnityModuleFetcherInner: React.FC = () => {
 
     const handleFetchModules = useCallback(async () => {
         if (!parsedVersion) {
-            setError('请先解析一个有效的 URI 以获取版本号。');
+            setError(t('unityModule.needParse'));
             return;
         }
 
@@ -285,7 +287,7 @@ const UnityModuleFetcherInner: React.FC = () => {
 
             const release = data.results?.[0];
             if (!release) {
-                throw new Error('未找到该版本的发布信息。');
+                throw new Error(t('unityModule.notFound'));
             }
 
             const download = release.downloads?.find(
@@ -295,7 +297,7 @@ const UnityModuleFetcherInner: React.FC = () => {
             const modulesOnline = download?.modules;
 
             if (!modulesOnline || modulesOnline.length === 0) {
-                throw new Error('返回的数据结构异常，未找到模块列表。');
+                throw new Error(t('unityModule.noModules'));
             }
 
             const processedModules: Module[] = [];
@@ -306,7 +308,7 @@ const UnityModuleFetcherInner: React.FC = () => {
             setModules(processedModules);
         } catch (err: any) {
             console.error("Fetching or processing failed:", err);
-            setError(err.message || '获取或处理模块时发生未知错误。');
+            setError(err.message || t('unityModule.fetchError'));
         } finally {
             setLoading(false);
         }
@@ -358,9 +360,9 @@ const UnityModuleFetcherInner: React.FC = () => {
                 {/* 头部标题 */}
                 <div className="border-b border-gray-100 pb-4">
                     <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                        UnityHub <span className="text-blue-600">modules.json</span> 生成器
+                        {t('unityModule.title')}
                     </h2>
-                    <p className="mt-2 text-sm text-gray-500">解析 UnityHub URI 并快速构建自动化安装配置文件</p>
+                    <p className="mt-2 text-sm text-gray-500">{t('unityModule.subtitle')}</p>
                 </div>
 
                 {/* URI 解析输入 */}
@@ -384,7 +386,7 @@ const UnityModuleFetcherInner: React.FC = () => {
                                 inputUri ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'
                             }`}
                         >
-                            解析版本
+                            {t('unityModule.parseBtn')}
                         </button>
                     </div>
                 </div>
@@ -393,7 +395,7 @@ const UnityModuleFetcherInner: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* 平台选择 */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">平台 (Platform)</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('unityModule.platform')}</label>
                         <select
                             value={selectedPlatform}
                             onChange={handlePlatformChange}
@@ -407,7 +409,7 @@ const UnityModuleFetcherInner: React.FC = () => {
 
                     {/* 架构选择 */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">架构 (Architecture)</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('unityModule.architecture')}</label>
                         <select
                             value={selectedArchitecture}
                             onChange={handleArchitectureChange}
@@ -421,13 +423,13 @@ const UnityModuleFetcherInner: React.FC = () => {
 
                     {/* 流选择 */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">流 (Stream)</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('unityModule.stream')}</label>
                         <select
                             value={selectedStream}
                             onChange={handleStreamChange}
                             className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
                         >
-                            <option value="">(不指定)</option>
+                            <option value="">{t('unityModule.unspecified')}</option>
                             {Object.values(UnityReleaseStream).map((s) => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
@@ -437,7 +439,7 @@ const UnityModuleFetcherInner: React.FC = () => {
 
                 {/* 授权复选框 */}
                 <div className="pt-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-3">授权 (Entitlements)</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-3">{t('unityModule.entitlements')}</label>
                     <div className="flex flex-wrap gap-2">
                         {Object.values(UnityReleaseEntitlement).map((ent) => (
                             <label
@@ -473,7 +475,7 @@ const UnityModuleFetcherInner: React.FC = () => {
                 {parsedVersion && (
                     <div className="flex items-center justify-between p-4 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200">
                         <div>
-                            <p className="text-xs opacity-80">当前解析版本</p>
+                            <p className="text-xs opacity-80">{t('unityModule.currentVersion')}</p>
                             <p className="font-mono font-bold text-lg">{parsedVersion}</p>
                         </div>
                         <button
@@ -481,7 +483,7 @@ const UnityModuleFetcherInner: React.FC = () => {
                             disabled={loading}
                             className="px-8 py-3 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition-colors disabled:opacity-50"
                         >
-                            {loading ? '获取中...' : '获取模块列表'}
+                            {loading ? t('unityModule.fetching') : t('unityModule.fetchBtn')}
                         </button>
                     </div>
                 )}
@@ -492,13 +494,13 @@ const UnityModuleFetcherInner: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-bold text-gray-800 flex items-center">
                                 <span className="mr-2 text-green-500">✓</span>
-                                成功获取 {modules.length} 个模块
+                                {t('unityModule.success', { count: modules.length })}
                             </h3>
                             <button
                                 onClick={handleDownloadJson}
                                 className="flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-bold hover:bg-purple-200 transition"
                             >
-                                下载 JSON
+                                {t('unityModule.downloadJson')}
                             </button>
                         </div>
 

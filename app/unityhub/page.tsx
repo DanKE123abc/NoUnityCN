@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, ExternalLink } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 const UnityLogo = () => (
   <svg
@@ -49,6 +50,7 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
 };
 
 export default function UnityHubPage() {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen bg-[#1a1a2e] text-white">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -57,17 +59,13 @@ export default function UnityHubPage() {
             <UnityLogo />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-            Unity Hub 下载
+            {t('unityHub.title')}
           </h1>
           <p className="text-gray-400 text-lg mb-2">
-            选择适合您系统的安装包格式
+            {t('unityHub.subtitle')}
           </p>
           <p className="text-gray-500 text-sm">
-            了解更多关于{" "}
-            <a href="#" className="text-blue-400 hover:underline">
-              许可协议
-            </a>{" "}
-            的信息
+            {t('unityHub.license')}
           </p>
         </div>
 

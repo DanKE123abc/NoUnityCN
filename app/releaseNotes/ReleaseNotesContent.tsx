@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { micromark } from 'micromark';
 import { fetchUnityReleases } from '@/lib/unity-api';
+import { useI18n } from '@/lib/i18n';
 
 function parseUnityHubUri(uri: string) {
     const pattern = /^unityhub:\/\/([^\/]+)\/(.+)$/;
@@ -12,6 +13,7 @@ function parseUnityHubUri(uri: string) {
 }
 
 export default function ReleaseNotesContent() {
+    const { t } = useI18n();
     const searchParams = useSearchParams();
     const v = searchParams.get('v');
 
@@ -59,7 +61,7 @@ export default function ReleaseNotesContent() {
     if (loading) {
         return (
             <div className="flex items-center justify-center p-12">
-                <div className="text-gray-500">加载中...</div>
+                <div className="text-gray-500">{t('releaseNotes.loading')}</div>
             </div>
         );
     }
@@ -72,7 +74,7 @@ export default function ReleaseNotesContent() {
                 <div className="w-full max-w-5xl bg-white shadow-xl rounded-3xl p-8 md:p-16 space-y-8">
                     <div className="text-center space-y-4">
                         <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">
-                            Release Notes - {parsed?.version || ''}
+                            {t('releaseNotes.title', { version: parsed?.version || '' })}
                         </h1>
                         <div className="w-24 h-1.5 bg-indigo-600 mx-auto rounded-full" />
                     </div>
@@ -81,7 +83,7 @@ export default function ReleaseNotesContent() {
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                     <div className="pt-8 border-t border-gray-100 text-center text-sm text-gray-400">
-                        来源: <a href={fallbackUrl} target="_blank" className="text-indigo-500 hover:underline">Unity API</a>
+                        {t('releaseNotes.source')} <a href={fallbackUrl} target="_blank" className="text-indigo-500 hover:underline">Unity API</a>
                     </div>
                 </div>
             </div>
@@ -92,10 +94,10 @@ export default function ReleaseNotesContent() {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
                 <div className="bg-white p-10 rounded-3xl shadow-lg border border-gray-100">
-                    <h1 className="text-2xl font-bold mb-4">暂不支持在线预览</h1>
-                    <p className="text-gray-500 mb-6">该版本说明无法直接显示，请前往原始页面查看。</p>
+                    <h1 className="text-2xl font-bold mb-4">{t('releaseNotes.unsupported')}</h1>
+                    <p className="text-gray-500 mb-6">{t('releaseNotes.unsupportedDesc')}</p>
                     <a href={fallbackUrl} target="_blank" className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition">
-                        打开原始文件
+                        {t('releaseNotes.openOriginal')}
                     </a>
                 </div>
             </div>
@@ -105,8 +107,8 @@ export default function ReleaseNotesContent() {
     return (
         <div className="flex flex-col items-center justify-center text-center p-10 h-[60vh]">
             <span className="text-8xl mb-6">🏜️</span>
-            <h1 className="text-4xl font-black text-gray-900 mb-2">400 Bad Request</h1>
-            <p className="text-gray-500">无法识别该 Unity 版本或 URI 格式有误。</p>
+            <h1 className="text-4xl font-black text-gray-900 mb-2">{t('releaseNotes.badRequest')}</h1>
+            <p className="text-gray-500">{t('releaseNotes.badRequestDesc')}</p>
         </div>
     );
 }

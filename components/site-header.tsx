@@ -4,16 +4,18 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-
-const navigation = [
-  { name: "主页", href: "/" },
-  { name: "Unity Hub", href: "/unityhub" },
-  { name: "工具", href: "/tools" },
-  { name: "在GitHub上给我们star⭐", href: "https://github.com/NoUnityCN/NoUnityCN" },
-]
+import { useI18n } from "@/lib/i18n"
 
 export function SiteHeader() {
   const pathname = usePathname()
+  const { t } = useI18n()
+
+  const navigation = [
+    { name: t("nav.home"), href: "/" },
+    { name: t("nav.unityHub"), href: "/unityhub" },
+    { name: t("nav.tools"), href: "/tools" },
+    { name: t("nav.githubStar"), href: "https://github.com/NoUnityCN/NoUnityCN" },
+  ]
 
   return (
     <nav className="bg-black shadow-sm">
