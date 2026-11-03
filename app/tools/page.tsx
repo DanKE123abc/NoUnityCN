@@ -32,6 +32,22 @@ export default function CommunityPage() {
                 <Button className="w-full" href="./unityModule">{t('tools.card.use')}</Button>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex justify-between">
+                  <div className="flex items-center gap-2">
+                    {t('tools.card.hubRoute')}
+                  </div>
+                  <Badge>{t('tools.card.hubRoute.badge')}</Badge>
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <p className="text-gray-600 mb-4">{t('tools.card.hubRoute.desc')}</p>
+                <Button className="w-full" href="https://github.com/HinataYoki/Unity_HubRoute">{t('tools.card.visit')}</Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>

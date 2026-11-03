@@ -37,6 +37,7 @@ const dictionaries: Record<Locale, Record<string, string>> = {
     "footer.downloadEditor": "下载 Unity Editor",
     "footer.downloadHub": "下载 Unity Hub",
     "footer.officialDocs": "Unity Editor 官方文档",
+    "footer.hubRoute": "Unity Hub 国际版下载与启动工具 (HubRoute)",
     "footer.github": "GitHub",
     "footer.desc1": "NoUnityCN是一项大家一起实现的开源项目，我们旨在为有中文使用需求的海外Unity开发者提供Unity Editor版本检索服务。",
     "footer.desc2": "“Unity”、Unity 徽标及其他 Unity 商标是 Unity Technologies 或其在美国和其他地区的分支机构的商标或注册商标。NoUnityCN不是Unity Technologies (优三缔科技有限公司) 软件提供的一项服务，本站徽标版权归Unity Technologies 或其在美国和其他地区的分支机构所有。",
@@ -82,6 +83,10 @@ const dictionaries: Record<Locale, Record<string, string>> = {
     "tools.card.modules.desc": "用于生成 modules.json 文件",
     "tools.card.modules.badge": "测试",
     "tools.card.use": "使用",
+    "tools.card.hubRoute": "Unity Hub 国际版下载与启动工具 (HubRoute)",
+    "tools.card.hubRoute.desc": "轻量、开源、跨平台的 Unity Hub 工具，可打开国际版 Unity Hub 官方下载地址，并通过本地 HTTP 代理启动 Hub。",
+    "tools.card.hubRoute.badge": "推荐",
+    "tools.card.visit": "访问",
 
     // unityHub
     "unityHub.title": "Unity Hub 下载",
@@ -174,6 +179,7 @@ const dictionaries: Record<Locale, Record<string, string>> = {
     "footer.downloadEditor": "Download Unity Editor",
     "footer.downloadHub": "Download Unity Hub",
     "footer.officialDocs": "Unity Editor Official Docs",
+    "footer.hubRoute": "Unity Hub International Download & Launcher (HubRoute)",
     "footer.unityModule": "UnityHub modules.json Generator",
     "footer.github": "GitHub",
     "footer.desc1": "NoUnityCN is an open-source project built together by the community, providing Unity Editor version lookup for developers with Chinese language needs.",
@@ -218,6 +224,10 @@ const dictionaries: Record<Locale, Record<string, string>> = {
     "tools.card.modules.desc": "Used to generate modules.json files",
     "tools.card.modules.badge": "Test",
     "tools.card.use": "Use",
+    "tools.card.hubRoute": "Unity Hub International Download & Launcher (HubRoute)",
+    "tools.card.hubRoute.desc": "A lightweight, open-source, cross-platform Unity Hub tool that opens official international Unity Hub downloads and launches Hub via a local HTTP proxy.",
+    "tools.card.hubRoute.badge": "Recommended",
+    "tools.card.visit": "Visit",
 
     "unityHub.title": "Download Unity Hub",
     "unityHub.subtitle": "Choose the installer format for your system",

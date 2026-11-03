@@ -30,6 +30,7 @@ export function SiteFooter() {
       category: t("footer.resources"),
       items: [
         { name: t("footer.officialDocs"), href: "https://docs.unity3d.com/Manual/index.html" },
+        { name: t("footer.hubRoute"), href: "https://github.com/HinataYoki/Unity_HubRoute" },
       ],
     },
     {
