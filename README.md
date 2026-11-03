@@ -48,7 +48,7 @@ NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版
 
 NoUnityCN v2版本在2026年6月上线，网站结构有所调整，但为了兼容历史遗留的url，我们保留了/download /component /tools /releaseNotses /unityModule 端点，这些端点仅为兼容旧版本url所保留，不会在新版网页中使用。
 
-Unity自6000系列开始属于“SUPPORTED”标签替代“TECH标签”，我们将其与“TECH”标签一并放在“技术支持”栏目中。
+Unity自6000系列开始使用“SUPPORTED”标签替代“TECH”标签，我们将其与“TECH”标签一并放在“技术支持”栏目中。
 
 ---
 
