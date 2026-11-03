@@ -6,6 +6,8 @@
 
 ##### 备用网址2：[nounitycn.danke666.top](https://nounitycn.danke666.top/)
 
+##### 本项目仅在 [本Github仓库](https://github.com/DanKE123abc/NoUnityCN) 进行开发，其他平台例如[AtomGit](https://gitcode.com/gh_mirrors/no/NoUnityCN)均为未经通知的镜像，请通过[本项目官方仓库](https://github.com/DanKE123abc/NoUnityCN)及官方网站提交问题报告。
+
 NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版本检索服务，使用官方公开接口开发，我们不会保留任何数据。
 
 > [!IMPORTANT]
@@ -25,6 +27,16 @@ NoUnityCN是为有中文使用需求的海外Unity开发者提供Unity Editor版
 > 本项目不提供任何技术授权文件(如激活License)
 > 
 > 本站不为不在Unity支持地区的用户服务
+
+### Star History
+
+<a href="https://www.star-history.com/?repos=nounitycn%2Fnounitycn&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=nounitycn/nounitycn&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=nounitycn/nounitycn&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=nounitycn/nounitycn&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ### 版权所有
 
